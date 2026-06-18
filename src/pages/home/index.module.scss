@@ -236,6 +236,279 @@
   }
 }
 
+.modalMask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+}
+
+.detailModal {
+  width: 100%;
+  max-height: 88vh;
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.2);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg;
+  border-bottom: 1rpx solid $color-border;
+}
+
+.modalTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  flex: 1;
+}
+
+.modalClose {
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 52rpx;
+  text-align: center;
+  font-size: 40rpx;
+  color: $color-text-tertiary;
+  border-radius: 50%;
+  background: $color-bg-hover;
+  cursor: pointer;
+}
+
+.modalBody {
+  flex: 1;
+  padding: $spacing-lg;
+  overflow-y: auto;
+}
+
+.modalAddressRow {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-lg;
+  padding: $spacing-md;
+  background: $color-primary-bg;
+  border-radius: $radius-md;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-sm;
+  margin-bottom: $spacing-xl;
+}
+
+.statItem {
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  text-align: center;
+}
+
+.statLabel {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: 8rpx;
+}
+
+.statValue {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.ratingsSection {
+  margin-bottom: $spacing-xl;
+}
+
+.ratingsHeader {
+  margin-bottom: $spacing-md;
+}
+
+.ratingsTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.ratingsSummary {
+  background: linear-gradient(135deg, #FFF8E7 0%, #FFFAF0 100%);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+}
+
+.ratingBigScore {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: #FF9500;
+  margin-left: $spacing-sm;
+}
+
+.ratingCountText {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-top: $spacing-xs;
+}
+
+.ratingWaitText {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-top: 4rpx;
+}
+
+.emptyRatings {
+  padding: $spacing-xl $spacing-md;
+  text-align: center;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+}
+
+.emptyRatingIcon {
+  font-size: 60rpx;
+  display: block;
+  margin-bottom: $spacing-sm;
+}
+
+.emptyRatingText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.commentList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.commentItem {
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+}
+
+.commentHeader {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: $spacing-sm;
+}
+
+.commentAvatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: $color-primary;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.commentInfo {
+  flex: 1;
+}
+
+.commentService {
+  display: block;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: 6rpx;
+}
+
+.commentTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-left: $spacing-sm;
+}
+
+.commentContent {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.6;
+}
+
+.tipsSection {
+  background: #F0F9FF;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+}
+
+.tipsTitle {
+  display: block;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: #1890FF;
+  margin-bottom: $spacing-sm;
+}
+
+.tipsItem {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  line-height: 1.8;
+}
+
+.modalFooter {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  border-top: 1rpx solid $color-border;
+  background: $color-bg-page;
+}
+
+.modalBtnSecondary {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-md;
+  border-radius: $radius-button;
+  background: $color-bg-hover;
+  color: $color-text-secondary;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.modalBtnPrimary {
+  @include button-reset;
+  flex: 1.5;
+  height: $button-height-md;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
 .elderMode {
   .location {
     font-size: 32rpx !important;
@@ -286,5 +559,54 @@
   .tideStatus {
     font-size: 26rpx !important;
     padding: 6rpx 16rpx !important;
+  }
+  .modalTitle {
+    font-size: 36rpx !important;
+  }
+  .modalClose {
+    width: 64rpx !important;
+    height: 64rpx !important;
+    line-height: 60rpx !important;
+    font-size: 44rpx !important;
+  }
+  .modalAddressRow {
+    font-size: 28rpx !important;
+  }
+  .statLabel {
+    font-size: 26rpx !important;
+  }
+  .statValue {
+    font-size: 32rpx !important;
+  }
+  .ratingsTitle {
+    font-size: 32rpx !important;
+  }
+  .ratingBigScore {
+    font-size: 40rpx !important;
+  }
+  .ratingCountText, .ratingWaitText {
+    font-size: 24rpx !important;
+  }
+  .emptyRatingText {
+    font-size: 28rpx !important;
+  }
+  .commentService {
+    font-size: 30rpx !important;
+  }
+  .commentTime {
+    font-size: 24rpx !important;
+  }
+  .commentContent {
+    font-size: 28rpx !important;
+  }
+  .tipsTitle {
+    font-size: 30rpx !important;
+  }
+  .tipsItem {
+    font-size: 26rpx !important;
+  }
+  .modalBtnSecondary, .modalBtnPrimary {
+    height: 100rpx !important;
+    font-size: 32rpx !important;
   }
 }

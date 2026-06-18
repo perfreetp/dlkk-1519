@@ -193,6 +193,116 @@
   font-size: 20rpx;
 }
 
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.simulateBtn {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  background: rgba(22, 93, 255, 0.08);
+}
+
+.emptyTimeline {
+  padding: $spacing-2xl 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.emptyTimelineIcon {
+  font-size: 64rpx;
+}
+
+.emptyTimelineText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.emptyTimelineHint {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 8rpx;
+}
+
+.timelineItem {
+  position: relative;
+  display: flex;
+  gap: $spacing-md;
+  padding-bottom: $spacing-xl;
+}
+
+.timelineLast {
+  padding-bottom: 0;
+}
+
+.timelineDot {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: $color-bg-hover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.timelineIcon {
+  font-size: 28rpx;
+}
+
+.timelineLine {
+  position: absolute;
+  left: 27rpx;
+  top: 56rpx;
+  width: 2rpx;
+  bottom: 0;
+  background: $color-divider;
+}
+
+.timelineContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.timelineHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6rpx;
+}
+
+.timelineTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.timelineTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.timelineDesc {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  line-height: 1.5;
+}
+
 .reminderSettings {
   display: flex;
   justify-content: space-between;
@@ -440,6 +550,38 @@
   }
   .broadcastBtn {
     height: 64rpx !important;
+    font-size: 28rpx !important;
+  }
+  .simulateBtn {
+    font-size: 28rpx !important;
+  }
+  .timelineTitle {
+    font-size: 30rpx !important;
+  }
+  .timelineTime {
+    font-size: 28rpx !important;
+  }
+  .timelineDesc {
+    font-size: 28rpx !important;
+  }
+  .timelineDot {
+    width: 64rpx !important;
+    height: 64rpx !important;
+  }
+  .timelineIcon {
+    font-size: 32rpx !important;
+  }
+  .timelineLine {
+    left: 31rpx !important;
+    top: 64rpx !important;
+  }
+  .emptyTimelineIcon {
+    font-size: 72rpx !important;
+  }
+  .emptyTimelineText {
+    font-size: 32rpx !important;
+  }
+  .emptyTimelineHint {
     font-size: 28rpx !important;
   }
 }

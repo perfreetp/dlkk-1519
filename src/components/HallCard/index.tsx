@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import { Hall } from '@/types';
+import { useAppStore } from '@/store/useAppStore';
 import { getCrowdLevelText, getCrowdLevelColor, formatDistance } from '@/utils';
 import styles from './index.module.scss';
 
@@ -15,6 +16,24 @@ interface HallCardProps {
 
 const HallCard: React.FC<HallCardProps> = ({ hall, showNearbyBadge = false, elderMode, onClick }) => {
   const crowdColor = getCrowdLevelColor(hall.crowdLevel);
+  const { getHallRatings } = useAppStore();
+
+  const ratingSummary = useMemo(() => {
+    return getHallRatings(hall.name);
+  }, [hall.name, getHallRatings]);
+
+  const renderStars = (rating: number) => {
+    const full = Math.floor(rating);
+    const half = rating - full >= 0.5;
+    const empty = 5 - full - (half ? 1 : 0);
+    return (
+      <>
+        {'★'.repeat(full)}
+        {half && '⯨'}
+        {'☆'.repeat(empty)}
+      </>
+    );
+  };
 
   const handleClick = () => {
     if (onClick) {
@@ -72,6 +91,23 @@ const HallCard: React.FC<HallCardProps> = ({ hall, showNearbyBadge = false, elde
           <Text className={styles.windowCount}>{hall.openWindows}</Text>
           <Text>/{hall.totalWindows}</Text>
         </View>
+      </View>
+
+      <View className={styles.ratingBar}>
+        <View className={styles.ratingStars}>
+          <Text className={styles.starsText} style={{ color: '#FF9500' }}>
+            {ratingSummary.totalCount > 0 ? renderStars(ratingSummary.avgRating) : '☆☆☆☆☆'}
+          </Text>
+          <Text className={styles.ratingScore}>
+            {ratingSummary.totalCount > 0 ? ratingSummary.avgRating.toFixed(1) : '暂无'}
+          </Text>
+        </View>
+        <Text className={styles.ratingMeta}>
+          {ratingSummary.totalCount > 0
+            ? `${ratingSummary.totalCount}条评价 · 平均等待${ratingSummary.avgWaitTime}分钟`
+            : '尚未有评价，点我查看详情'}
+        </Text>
+        <Text className={styles.ratingArrow}>›</Text>
       </View>
     </View>
   );

@@ -69,9 +69,9 @@ const RecordPage: React.FC = () => {
     }
     if (!ratingRecord) return;
 
-    saveRating(ratingRecord.id, rating, comment);
+    saveRating(ratingRecord.id, rating, comment, ratingRecord.hallName, ratingRecord.serviceName);
     if (voiceMode) {
-      speak('评价提交成功');
+      speak('评价提交成功').catch(() => {});
     }
     Taro.showToast({
       title: '评价成功',

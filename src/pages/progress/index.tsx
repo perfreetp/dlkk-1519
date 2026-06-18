@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
-import { useAppStore } from '@/store/useAppStore';
+import { useAppStore, QueueTimelineEvent } from '@/store/useAppStore';
 import { serviceList } from '@/data/services';
 import { hallList } from '@/data/halls';
 import { getStatusText } from '@/utils';
@@ -17,12 +17,47 @@ const ProgressPage: React.FC = () => {
     toggleVoiceMode,
     elderMode,
     speak,
-    voiceSupport
+    voiceSupport,
+    getTimelineForQueue
   } = useAppStore();
   const [callReminder, setCallReminder] = useState(true);
 
   const currentService = serviceList.find(s => s.name === currentQueue?.serviceName);
   const currentHall = hallList.find(h => h.id === currentQueue?.hallId);
+
+  const timeline = useMemo<QueueTimelineEvent[]>(() => {
+    if (!currentQueue) return [];
+    return getTimelineForQueue(currentQueue.id);
+  }, [currentQueue, getTimelineForQueue]);
+
+  const handleSimulateTimeline = () => {
+    if (!currentQueue) return;
+    const { addTimelineEvent } = useAppStore.getState();
+    const demoEvents: Array<Omit<QueueTimelineEvent, 'id' | 'queueId' | 'time'>> = [
+      { type: 'wait', title: '前方减少1人', description: '前方还有12人等待' },
+      { type: 'wait', title: '前方减少2人', description: '前方还有10人等待' },
+      { type: 'calling', title: '即将叫号', description: '前方还有3人，建议做好准备' },
+    ];
+    if (demoEvents.length > 0) {
+      const random = demoEvents[Math.floor(Math.random() * demoEvents.length)];
+      addTimelineEvent(currentQueue.id, random);
+      Taro.showToast({ title: '已添加模拟事件', icon: 'success' });
+    }
+  };
+
+  const timelineIcon = (type: QueueTimelineEvent['type']) => {
+    const iconMap = {
+      queue: '🎫',
+      wait: '⏳',
+      calling: '🔔',
+      processing: '💼',
+      missed: '⚠️',
+      requeued: '🔄',
+      completed: '✅',
+      info: 'ℹ️'
+    };
+    return iconMap[type];
+  };
 
   const handleRequeue = () => {
     if (!currentQueue) return;
@@ -169,15 +204,24 @@ const ProgressPage: React.FC = () => {
     });
   };
 
-  const handleBroadcast = () => {
+  const handleBroadcast = async () => {
     if (currentQueue) {
-      const result = speak(`您的号码${currentQueue.queueNumber}，前方还有${currentQueue.waitCount}人等待`);
-      if (!result.success) {
+      try {
+        const result = await speak(`您的号码${currentQueue.queueNumber}，前方还有${currentQueue.waitCount}人等待`);
+        if (!result.success) {
+          Taro.showModal({
+            title: '语音播报失败',
+            content: `【当前平台】${voiceSupport.platform}\n【播报方式】${voiceSupport.method === 'webSpeech' ? '浏览器原生' : voiceSupport.method === 'tts' ? 'TTS云服务' : '无'}\n【失败原因】${result.reason || '未知原因'}\n\n排查建议：\n1. H5端请使用Chrome/Edge/Safari现代浏览器\n2. 小程序端请确保可访问tts.youdao.com\n3. 检查设备音量开关，解除静音模式\n4. 重启小程序/页面后重试`,
+            showCancel: false,
+            confirmText: '我知道了'
+          });
+        }
+      } catch (e: any) {
         Taro.showModal({
-          title: '语音播报失败',
-          content: `当前平台（${voiceSupport.platform}）无法播放语音：${result.reason || '未知原因'}\n\n建议：\n1. H5端请使用Chrome、Edge等现代浏览器\n2. 小程序端需接入语音合成TTS服务\n3. 检查设备音量是否开启`,
+          title: '语音播报异常',
+          content: `播报过程中发生错误：${e?.message || JSON.stringify(e)}\n\n请稍后重试。`,
           showCancel: false,
-          confirmText: '我知道了'
+          confirmText: '好的'
         });
       }
     }
@@ -258,6 +302,53 @@ const ProgressPage: React.FC = () => {
             </Text>
           </View>
         )}
+
+        <View className={styles.section}>
+          <View className={styles.sectionHeader}>
+            <View className={styles.sectionTitle}>
+              <Text className={styles.sectionIcon}>📊</Text>
+              <Text>叫号进度</Text>
+            </View>
+            <Text className={styles.simulateBtn} onClick={handleSimulateTimeline}>
+              模拟变化
+            </Text>
+          </View>
+          {timeline.length === 0 ? (
+            <View className={styles.emptyTimeline}>
+              <Text className={styles.emptyTimelineIcon}>🕰️</Text>
+              <Text className={styles.emptyTimelineText}>暂无叫号变化记录</Text>
+              <Text className={styles.emptyTimelineHint}>取号后每次叫号变化都会记录在这里</Text>
+            </View>
+          ) : (
+            <View className={styles.timeline}>
+              {timeline.map((event, idx) => (
+                <View
+                  key={event.id}
+                  className={classnames(
+                    styles.timelineItem,
+                    idx === timeline.length - 1 && styles.timelineLast
+                  )}
+                >
+                  <View className={styles.timelineDot}>
+                    <Text className={styles.timelineIcon}>{timelineIcon(event.type)}</Text>
+                  </View>
+                  {idx < timeline.length - 1 && <View className={styles.timelineLine} />}
+                  <View className={styles.timelineContent}>
+                    <View className={styles.timelineHead}>
+                      <Text className={styles.timelineTitle}>{event.title}</Text>
+                      <Text className={styles.timelineTime}>
+                        {event.time.split(' ')[1]?.slice(0, 5)}
+                      </Text>
+                    </View>
+                    {event.description && (
+                      <Text className={styles.timelineDesc}>{event.description}</Text>
+                    )}
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
 
         {currentService && (
           <View className={styles.section}>
