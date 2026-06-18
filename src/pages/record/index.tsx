@@ -22,7 +22,8 @@ const RecordPage: React.FC = () => {
     toggleVoiceMode,
     saveRating,
     getRating,
-    speak
+    speak,
+    voiceSupport
   } = useAppStore();
   const [activeFilter, setActiveFilter] = useState('all');
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -84,6 +85,14 @@ const RecordPage: React.FC = () => {
   };
 
   const handleToggleVoice = () => {
+    if (!voiceSupport.supported && !voiceMode) {
+      Taro.showModal({
+        title: '语音播报不可用',
+        content: `当前运行平台：${voiceSupport.platform}\n\n原因：${voiceSupport.reason || '未检测到语音合成能力'}\n\n您仍可以开启该选项，在支持的平台（如Chrome浏览器、微信小程序接入TTS后）会自动生效。`,
+        confirmText: '仍然开启',
+        cancelText: '取消'
+      });
+    }
     toggleVoiceMode();
   };
 
@@ -164,11 +173,18 @@ const RecordPage: React.FC = () => {
                 <Text className={styles.settingIcon}>🔊</Text>
                 <View>
                   <Text className={styles.settingText}>语音播报</Text>
-                  <Text className={styles.settingDesc}>叫号提醒、操作反馈语音播报</Text>
+                  <Text className={styles.settingDesc}>
+                    叫号提醒、操作反馈语音播报
+                    {!voiceSupport.supported && (
+                      <Text className={styles.voiceWarn}>
+                        {' '}（当前平台不支持）
+                      </Text>
+                    )}
+                  </Text>
                 </View>
               </View>
               <View
-                className={classnames(styles.switch, voiceMode && styles.active)}
+                className={classnames(styles.switch, voiceMode && styles.active, !voiceSupport.supported && styles.switchDisabled)}
                 onClick={handleToggleVoice}
               />
             </View>

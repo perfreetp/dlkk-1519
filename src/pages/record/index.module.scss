@@ -173,6 +173,15 @@
   &.active::after {
     left: 44rpx;
   }
+
+  &.switchDisabled {
+    opacity: 0.6;
+  }
+}
+
+.voiceWarn {
+  color: #f59f00;
+  font-weight: $font-weight-medium;
 }
 
 .filterTabs {

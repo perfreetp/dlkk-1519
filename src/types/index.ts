@@ -4,6 +4,8 @@ export interface Hall {
   id: string;
   name: string;
   address: string;
+  latitude: number;
+  longitude: number;
   distance: number;
   crowdLevel: 'low' | 'medium' | 'high';
   waitTime: number;

@@ -239,6 +239,15 @@
   &.active::after {
     left: 44rpx;
   }
+
+  &.disabled {
+    opacity: 0.6;
+  }
+}
+
+.voiceWarn {
+  color: #f59f00;
+  font-weight: $font-weight-medium;
 }
 
 .actionBar {
