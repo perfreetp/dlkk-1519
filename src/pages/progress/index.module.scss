@@ -1,0 +1,346 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, $color-primary 0%, $color-bg-page 400rpx);
+  padding-bottom: 120rpx;
+}
+
+.content {
+  padding: $spacing-lg $page-padding;
+}
+
+.queueCard {
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+  margin-bottom: $spacing-lg;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8rpx;
+    background: linear-gradient(90deg, $color-primary 0%, $color-primary-light 100%);
+  }
+}
+
+.queueHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-lg;
+}
+
+.serviceName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  flex: 1;
+  @include text-ellipsis;
+}
+
+.statusBadge {
+  font-size: $font-size-sm;
+  padding: 6rpx 16rpx;
+  border-radius: $radius-round;
+  margin-left: $spacing-md;
+  white-space: nowrap;
+}
+
+.waiting {
+  background: $color-primary-bg;
+  color: $color-primary;
+}
+
+.calling {
+  background: $color-warning-bg;
+  color: $color-warning;
+}
+
+.missed {
+  background: $color-error-bg;
+  color: $color-error;
+}
+
+.completed {
+  background: $color-bg-hover;
+  color: $color-text-tertiary;
+}
+
+.requeued {
+  background: $color-primary-bg;
+  color: $color-primary;
+}
+
+.queueNumber {
+  text-align: center;
+  padding: $spacing-lg 0;
+  margin-bottom: $spacing-lg;
+  background: linear-gradient(135deg, $color-primary-bg 0%, #f0f5ff 100%);
+  border-radius: $radius-lg;
+}
+
+.numberLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.numberValue {
+  font-size: 96rpx;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  line-height: 1;
+  letter-spacing: 6rpx;
+}
+
+.queueStats {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: $spacing-lg;
+}
+
+.statItem {
+  text-align: center;
+  flex: 1;
+}
+
+.statValue {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.statLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.queueInfo {
+  border-top: 1rpx solid $color-divider;
+  padding-top: $spacing-md;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  padding: $spacing-sm 0;
+  font-size: $font-size-sm;
+}
+
+.infoLabel {
+  color: $color-text-tertiary;
+}
+
+.infoValue {
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.section {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.sectionIcon {
+  margin-right: $spacing-sm;
+  font-size: 28rpx;
+}
+
+.materialList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.materialItem {
+  display: flex;
+  align-items: center;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  padding: $spacing-xs 0;
+}
+
+.materialCheck {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  background: $color-success-bg;
+  color: $color-success;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-sm;
+  font-size: 20rpx;
+}
+
+.reminderSettings {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm 0;
+}
+
+.reminderText {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+}
+
+.reminderDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.switch {
+  width: 88rpx;
+  height: 48rpx;
+  border-radius: 24rpx;
+  background: $color-bg-hover;
+  position: relative;
+  transition: all $transition-base;
+
+  &.active {
+    background: $color-primary;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 4rpx;
+    left: 4rpx;
+    width: 40rpx;
+    height: 40rpx;
+    border-radius: 50%;
+    background: #fff;
+    transition: all $transition-base;
+    box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+  }
+
+  &.active::after {
+    left: 44rpx;
+  }
+}
+
+.actionBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: $color-bg-card;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc($spacing-md + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  gap: $spacing-md;
+}
+
+.actionBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnSecondary {
+  background: $color-bg-hover;
+  color: $color-text-secondary;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+}
+
+.btnDanger {
+  background: $color-error-bg;
+  color: $color-error;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 120rpx 0;
+}
+
+.emptyIcon {
+  font-size: 120rpx;
+  margin-bottom: $spacing-lg;
+}
+
+.emptyTitle {
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-sm;
+}
+
+.emptyDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-xl;
+}
+
+.emptyBtn {
+  @include button-reset;
+  display: inline-flex;
+  height: $button-height-lg;
+  padding: 0 $spacing-xl * 2;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.tipBox {
+  background: $color-warning-bg;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: $spacing-md;
+}
+
+.tipIcon {
+  font-size: 28rpx;
+  margin-right: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.tipText {
+  font-size: $font-size-sm;
+  color: $color-warning;
+  line-height: 1.5;
+}

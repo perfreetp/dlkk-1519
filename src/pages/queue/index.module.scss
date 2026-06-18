@@ -1,0 +1,265 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 120rpx;
+}
+
+.hallSelector {
+  background: $color-bg-card;
+  padding: $spacing-md $page-padding;
+  display: flex;
+  align-items: center;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.hallLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-right: $spacing-sm;
+}
+
+.hallName {
+  flex: 1;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.hallArrow {
+  color: $color-text-tertiary;
+  font-size: $font-size-sm;
+}
+
+.searchBar {
+  padding: $spacing-md $page-padding;
+  background: $color-bg-card;
+}
+
+.searchInputWrap {
+  background: $color-bg-page;
+  border-radius: $radius-button;
+  padding: 0 $spacing-lg;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  font-size: 28rpx;
+  color: $color-text-tertiary;
+  margin-right: $spacing-sm;
+}
+
+.searchInput {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+.content {
+  padding: 0 $page-padding;
+}
+
+.categoryTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  padding: $spacing-md 0;
+}
+
+.categoryTab {
+  padding: 12rpx 24rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  background: $color-bg-card;
+  color: $color-text-secondary;
+  white-space: nowrap;
+
+  &.active {
+    background: $color-primary-bg;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.serviceList {
+  margin-top: $spacing-md;
+}
+
+.serviceItem {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.04);
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.serviceIcon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-md;
+  background: $color-primary-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.serviceInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.serviceName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+  margin-bottom: 8rpx;
+}
+
+.serviceDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.onlineBadge {
+  font-size: $font-size-xs;
+  padding: 2rpx 8rpx;
+  border-radius: $radius-xs;
+  background: $color-success-bg;
+  color: $color-success;
+}
+
+.timeText {
+  color: $color-text-tertiary;
+}
+
+.serviceArrow {
+  color: $color-text-tertiary;
+  font-size: $font-size-lg;
+  margin-left: $spacing-sm;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 1000;
+}
+
+.modalContent {
+  width: 100%;
+  background: $color-bg-card;
+  border-radius: $radius-xl $radius-xl 0 0;
+  padding: $spacing-lg $page-padding;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modalTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  text-align: center;
+  margin-bottom: $spacing-lg;
+}
+
+.modalSection {
+  margin-bottom: $spacing-lg;
+}
+
+.modalSectionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.materialList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.materialItem {
+  display: flex;
+  align-items: center;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.materialIcon {
+  margin-right: $spacing-sm;
+  color: $color-success;
+}
+
+.modalInfoRow {
+  display: flex;
+  justify-content: space-between;
+  padding: $spacing-sm 0;
+  border-bottom: 1rpx solid $color-divider;
+  font-size: $font-size-sm;
+}
+
+.infoLabel {
+  color: $color-text-secondary;
+}
+
+.infoValue {
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.modalActions {
+  display: flex;
+  gap: $spacing-md;
+  padding-top: $spacing-md;
+}
+
+.modalBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnCancel {
+  background: $color-bg-hover;
+  color: $color-text-secondary;
+}
+
+.btnConfirm {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+}

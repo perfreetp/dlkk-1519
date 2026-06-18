@@ -1,0 +1,108 @@
+@use '@/styles/variables.scss' as *;
+
+.hallCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+
+  &.nearby {
+    border: 2rpx solid $color-primary;
+  }
+}
+
+.hallHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.hallName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+  flex: 1;
+}
+
+.nearbyBadge {
+  background: $color-primary-bg;
+  color: $color-primary;
+  font-size: $font-size-xs;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-sm;
+  margin-left: $spacing-sm;
+  white-space: nowrap;
+}
+
+.hallType {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  background: $color-bg-hover;
+  padding: 4rpx 10rpx;
+  border-radius: $radius-xs;
+  margin-left: $spacing-sm;
+}
+
+.hallAddress {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+}
+
+.addressIcon {
+  margin-right: 8rpx;
+}
+
+.distance {
+  color: $color-text-tertiary;
+  margin-left: $spacing-sm;
+}
+
+.hallInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.crowdInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.crowdItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.crowdLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: 4rpx;
+}
+
+.crowdValue {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+}
+
+.low { color: $color-crowd-low; }
+.medium { color: $color-crowd-medium; }
+.high { color: $color-crowd-high; }
+
+.windowInfo {
+  text-align: right;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.windowCount {
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}

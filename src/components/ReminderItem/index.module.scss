@@ -1,0 +1,73 @@
+@use '@/styles/variables.scss' as *;
+
+.reminderItem {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.04);
+}
+
+.iconWrapper {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+  font-size: 32rpx;
+}
+
+.call { background: $color-primary-bg; color: $color-primary; }
+.material { background: $color-warning-bg; color: $color-warning; }
+.tide { background: $color-success-bg; color: $color-success; }
+.system { background: $color-bg-hover; color: $color-text-secondary; }
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.title {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+  flex: 1;
+}
+
+.time {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-left: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.desc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.5;
+  @include text-ellipsis-multi(2);
+}
+
+.unreadDot {
+  position: absolute;
+  top: 20rpx;
+  right: 20rpx;
+  width: 16rpx;
+  height: 16rpx;
+  background: $color-error;
+  border-radius: 50%;
+}

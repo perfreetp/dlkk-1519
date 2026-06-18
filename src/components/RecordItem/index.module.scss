@@ -1,0 +1,106 @@
+@use '@/styles/variables.scss' as *;
+
+.recordItem {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-sm;
+  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.04);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.serviceName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+  flex: 1;
+  margin-right: $spacing-sm;
+}
+
+.statusTag {
+  font-size: $font-size-xs;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+  white-space: nowrap;
+}
+
+.completed {
+  background: $color-success-bg;
+  color: $color-success;
+}
+
+.incomplete {
+  background: $color-error-bg;
+  color: $color-error;
+}
+
+.missed {
+  background: $color-error-bg;
+  color: $color-error;
+}
+
+.info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.hall {
+  @include text-ellipsis;
+  flex: 1;
+}
+
+.queueNum {
+  margin-left: $spacing-md;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: $spacing-sm;
+  border-top: 1rpx solid $color-divider;
+}
+
+.date {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.star {
+  font-size: $font-size-md;
+  color: $color-warning;
+}
+
+.actionBtn {
+  @include button-reset;
+  height: 48rpx;
+  padding: 0 $spacing-md;
+  border-radius: $radius-round;
+  font-size: $font-size-xs;
+  background: $color-primary-bg;
+  color: $color-primary;
+  border: none;
+
+  &:active {
+    opacity: 0.8;
+  }
+}

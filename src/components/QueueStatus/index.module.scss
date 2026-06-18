@@ -1,0 +1,123 @@
+@use '@/styles/variables.scss' as *;
+
+.queueCard {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  color: $color-text-white;
+  box-shadow: 0 8rpx 24rpx rgba(22, 93, 255, 0.3);
+}
+
+.queueHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-lg;
+}
+
+.queueService {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  @include text-ellipsis;
+  flex: 1;
+  margin-right: $spacing-md;
+}
+
+.statusBadge {
+  background: rgba(255, 255, 255, 0.25);
+  font-size: $font-size-sm;
+  padding: 6rpx 16rpx;
+  border-radius: $radius-round;
+  white-space: nowrap;
+}
+
+.queueNumber {
+  text-align: center;
+  margin-bottom: $spacing-lg;
+}
+
+.numberLabel {
+  font-size: $font-size-sm;
+  opacity: 0.9;
+  margin-bottom: $spacing-sm;
+}
+
+.numberValue {
+  font-size: 80rpx;
+  font-weight: $font-weight-bold;
+  line-height: 1;
+  letter-spacing: 4rpx;
+}
+
+.queueStats {
+  display: flex;
+  justify-content: space-around;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: $radius-md;
+  padding: $spacing-md 0;
+  margin-bottom: $spacing-lg;
+}
+
+.statItem {
+  text-align: center;
+  flex: 1;
+}
+
+.statValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  margin-bottom: 4rpx;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  opacity: 0.9;
+}
+
+.queueFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: $font-size-sm;
+}
+
+.hallInfo {
+  @include text-ellipsis;
+  flex: 1;
+}
+
+.timeInfo {
+  opacity: 0.9;
+}
+
+.actionBtns {
+  display: flex;
+  gap: $spacing-md;
+  margin-top: $spacing-lg;
+}
+
+.btn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-md;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnPrimary {
+  background: $color-text-white;
+  color: $color-primary;
+}
+
+.btnOutline {
+  background: transparent;
+  border: 2rpx solid rgba(255, 255, 255, 0.5);
+  color: $color-text-white;
+}
