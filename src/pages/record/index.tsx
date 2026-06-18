@@ -1,11 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, Button, Textarea } from '@tarojs/components';
+import { View, Text, ScrollView, Button, Textarea, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
 import { queueHistoryMock } from '@/data/queue';
 import { ServiceRecord } from '@/types';
-import RecordItem from '@/components/RecordItem';
 import styles from './index.module.scss';
 
 const filterOptions = [
@@ -30,6 +29,7 @@ const RecordPage: React.FC = () => {
   const [ratingRecord, setRatingRecord] = useState<ServiceRecord | null>(null);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [waitMinutes, setWaitMinutes] = useState<string>('');
 
   const records: ServiceRecord[] = useMemo(() => {
     return queueHistoryMock.map(q => {
@@ -56,6 +56,7 @@ const RecordPage: React.FC = () => {
     const existing = getRating(record.id);
     setRating(existing?.rating || 0);
     setComment(existing?.comment || '');
+    setWaitMinutes(existing?.waitMinutes ? String(existing.waitMinutes) : '');
     setShowRatingModal(true);
   };
 
@@ -69,10 +70,18 @@ const RecordPage: React.FC = () => {
     }
     if (!ratingRecord) return;
 
-    saveRating(ratingRecord.id, rating, comment, ratingRecord.hallName, ratingRecord.serviceName);
-    if (voiceMode) {
-      speak('评价提交成功').catch(() => {});
-    }
+    const waitNum = waitMinutes ? parseInt(waitMinutes, 10) : undefined;
+    saveRating(
+      ratingRecord.id,
+      rating,
+      comment,
+      ratingRecord.hallName,
+      ratingRecord.serviceName,
+      waitNum
+    );
+
+    speak('评价提交成功，感谢您的反馈').catch(() => { });
+
     Taro.showToast({
       title: '评价成功',
       icon: 'success'
@@ -84,16 +93,8 @@ const RecordPage: React.FC = () => {
     toggleElderMode();
   };
 
-  const handleToggleVoice = () => {
-    if (!voiceSupport.supported && !voiceMode) {
-      Taro.showModal({
-        title: '语音播报不可用',
-        content: `当前运行平台：${voiceSupport.platform}\n\n原因：${voiceSupport.reason || '未检测到语音合成能力'}\n\n您仍可以开启该选项，在支持的平台（如Chrome浏览器、微信小程序接入TTS后）会自动生效。`,
-        confirmText: '仍然开启',
-        cancelText: '取消'
-      });
-    }
-    toggleVoiceMode();
+  const handleToggleVoice = async () => {
+    await toggleVoiceMode();
   };
 
   const stats = {
@@ -334,6 +335,18 @@ const RecordPage: React.FC = () => {
                 {rating === 5 && '非常满意'}
                 {rating === 0 && '请点击星星评分'}
               </Text>
+            </View>
+
+            <View className={styles.waitInputWrap}>
+              <Text className={styles.waitInputLabel}>实际等待时长（分钟）</Text>
+              <Input
+                className={styles.waitInput}
+                type="number"
+                placeholder="选填，帮助其他群众了解等待情况"
+                value={waitMinutes}
+                onInput={(e) => setWaitMinutes(e.detail.value)}
+                maxlength={3}
+              />
             </View>
 
             <Textarea

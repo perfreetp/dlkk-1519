@@ -351,27 +351,79 @@
   background: linear-gradient(135deg, #FFF8E7 0%, #FFFAF0 100%);
   border-radius: $radius-md;
   padding: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.ratingScoreRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  margin-bottom: $spacing-sm;
 }
 
 .ratingBigScore {
-  font-size: $font-size-xl;
+  font-size: 56rpx;
   font-weight: $font-weight-bold;
   color: #FF9500;
-  margin-left: $spacing-sm;
+  line-height: 1;
 }
 
 .ratingCountText {
-  display: block;
-  font-size: $font-size-xs;
-  color: $color-text-secondary;
-  margin-top: $spacing-xs;
-}
-
-.ratingWaitText {
-  display: block;
   font-size: $font-size-xs;
   color: $color-text-secondary;
   margin-top: 4rpx;
+}
+
+.ratingWaitRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: $spacing-sm;
+  border-top: 1rpx dashed rgba(255, 149, 0, 0.3);
+}
+
+.waitLabel {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.waitValue {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: #FF9500;
+}
+
+.commentMetaRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4rpx;
+}
+
+.commentStarsRow {
+  display: flex;
+  align-items: center;
+}
+
+.commentWait {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-xs;
+  padding: 6rpx 12rpx;
+  background: #F0F7FF;
+  border-radius: $radius-xs;
+  display: inline-flex;
+}
+
+.commentWaitLabel {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.commentWaitValue {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: #1677FF;
 }
 
 .emptyRatings {

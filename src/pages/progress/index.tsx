@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
-import { useAppStore, QueueTimelineEvent } from '@/store/useAppStore';
+import { useAppStore, formatDate } from '@/store/useAppStore';
+import { QueueTimelineEvent } from '@/types';
 import { serviceList } from '@/data/services';
 import { hallList } from '@/data/halls';
 import { getStatusText } from '@/utils';
@@ -18,9 +19,14 @@ const ProgressPage: React.FC = () => {
     elderMode,
     speak,
     voiceSupport,
-    getTimelineForQueue
+    getTimelineForQueue,
+    simulateWaitProgress,
+    simulateCallNumber,
+    simulateMissed,
+    simulateProcessing
   } = useAppStore();
   const [callReminder, setCallReminder] = useState(true);
+  const [showSimulateMenu, setShowSimulateMenu] = useState(false);
 
   const currentService = serviceList.find(s => s.name === currentQueue?.serviceName);
   const currentHall = hallList.find(h => h.id === currentQueue?.hallId);
@@ -30,19 +36,35 @@ const ProgressPage: React.FC = () => {
     return getTimelineForQueue(currentQueue.id);
   }, [currentQueue, getTimelineForQueue]);
 
-  const handleSimulateTimeline = () => {
-    if (!currentQueue) return;
-    const { addTimelineEvent } = useAppStore.getState();
-    const demoEvents: Array<Omit<QueueTimelineEvent, 'id' | 'queueId' | 'time'>> = [
-      { type: 'wait', title: '前方减少1人', description: '前方还有12人等待' },
-      { type: 'wait', title: '前方减少2人', description: '前方还有10人等待' },
-      { type: 'calling', title: '即将叫号', description: '前方还有3人，建议做好准备' },
-    ];
-    if (demoEvents.length > 0) {
-      const random = demoEvents[Math.floor(Math.random() * demoEvents.length)];
-      addTimelineEvent(currentQueue.id, random);
-      Taro.showToast({ title: '已添加模拟事件', icon: 'success' });
-    }
+  const handleSimulateWait = () => {
+    simulateWaitProgress();
+    setShowSimulateMenu(false);
+    Taro.showToast({ title: '前方-1人', icon: 'none' });
+  };
+
+  const handleSimulateCall = () => {
+    simulateCallNumber();
+    setShowSimulateMenu(false);
+    Taro.showToast({ title: '即将叫号', icon: 'none' });
+  };
+
+  const handleSimulateMissed = () => {
+    Taro.showModal({
+      title: '模拟过号',
+      content: '确定要模拟过号场景吗？过号后可申请重新排队。',
+      success: (res) => {
+        if (res.confirm) {
+          simulateMissed();
+          setShowSimulateMenu(false);
+        }
+      }
+    });
+  };
+
+  const handleSimulateProcessing = () => {
+    simulateProcessing();
+    setShowSimulateMenu(false);
+    Taro.showToast({ title: '开始办理', icon: 'none' });
   };
 
   const timelineIcon = (type: QueueTimelineEvent['type']) => {
@@ -88,7 +110,7 @@ const ProgressPage: React.FC = () => {
         if (res.confirm) {
           cancelCurrentQueue();
           if (voiceMode) {
-            speak('已取消取号');
+            speak('已取消取号').catch(() => {});
           }
           Taro.showToast({
             title: '已取消取号',
@@ -122,7 +144,7 @@ const ProgressPage: React.FC = () => {
       });
       return;
     }
-    const missingInfo = [];
+    const missingInfo: string[] = [];
     if (!currentHall.latitude && currentHall.latitude !== 0) missingInfo.push('纬度');
     if (!currentHall.longitude && currentHall.longitude !== 0) missingInfo.push('经度');
     if (!currentHall.name) missingInfo.push('大厅名称');
@@ -159,7 +181,7 @@ const ProgressPage: React.FC = () => {
       success: (res) => {
         if (res.tapIndex === 0) {
           if (voiceMode) {
-            speak(`正在为您导航到${currentHall.name}`);
+            speak(`正在为您导航到${currentHall.name}`).catch(() => {});
           }
           Taro.openLocation({
             latitude: currentHall.latitude,
@@ -224,6 +246,12 @@ const ProgressPage: React.FC = () => {
           confirmText: '好的'
         });
       }
+    }
+  };
+
+  const handleToggleVoice = async () => {
+    const result = await toggleVoiceMode();
+    if (!result.success && !voiceMode) {
     }
   };
 
@@ -309,10 +337,44 @@ const ProgressPage: React.FC = () => {
               <Text className={styles.sectionIcon}>📊</Text>
               <Text>叫号进度</Text>
             </View>
-            <Text className={styles.simulateBtn} onClick={handleSimulateTimeline}>
-              模拟变化
+            <Text className={styles.simulateBtn} onClick={() => setShowSimulateMenu(!showSimulateMenu)}>
+              模拟变化 {showSimulateMenu ? '▲' : '▼'}
             </Text>
           </View>
+
+          {showSimulateMenu && (
+            <View className={styles.simulateMenu}>
+              <View className={styles.simulateItem} onClick={handleSimulateWait}>
+                <Text className={styles.simulateIcon}>⏳</Text>
+                <View>
+                  <Text className={styles.simulateTitle}>前方减少1人</Text>
+                  <Text className={styles.simulateDesc}>模拟叫号推进</Text>
+                </View>
+              </View>
+              <View className={styles.simulateItem} onClick={handleSimulateCall}>
+                <Text className={styles.simulateIcon}>🔔</Text>
+                <View>
+                  <Text className={styles.simulateTitle}>即将叫号</Text>
+                  <Text className={styles.simulateDesc}>触发叫号提醒</Text>
+                </View>
+              </View>
+              <View className={styles.simulateItem} onClick={handleSimulateMissed}>
+                <Text className={styles.simulateIcon}>⚠️</Text>
+                <View>
+                  <Text className={styles.simulateTitle}>过号</Text>
+                  <Text className={styles.simulateDesc}>模拟错过叫号</Text>
+                </View>
+              </View>
+              <View className={styles.simulateItem} onClick={handleSimulateProcessing}>
+                <Text className={styles.simulateIcon}>💼</Text>
+                <View>
+                  <Text className={styles.simulateTitle}>开始办理</Text>
+                  <Text className={styles.simulateDesc}>进入办理中状态</Text>
+                </View>
+              </View>
+            </View>
+          )}
+
           {timeline.length === 0 ? (
             <View className={styles.emptyTimeline}>
               <Text className={styles.emptyTimelineIcon}>🕰️</Text>
@@ -337,7 +399,7 @@ const ProgressPage: React.FC = () => {
                     <View className={styles.timelineHead}>
                       <Text className={styles.timelineTitle}>{event.title}</Text>
                       <Text className={styles.timelineTime}>
-                        {event.time.split(' ')[1]?.slice(0, 5)}
+                        {formatDate(event.time)}
                       </Text>
                     </View>
                     {event.description && (
@@ -382,7 +444,7 @@ const ProgressPage: React.FC = () => {
               onClick={() => {
                 setCallReminder(!callReminder);
                 if (voiceMode && !callReminder) {
-                  speak('已开启叫号提醒');
+                  speak('已开启叫号提醒').catch(() => {});
                 }
               }}
             />
@@ -401,17 +463,7 @@ const ProgressPage: React.FC = () => {
             </View>
             <View
               className={classnames(styles.switch, voiceMode && styles.active, !voiceSupport.supported && styles.disabled)}
-              onClick={() => {
-                if (!voiceSupport.supported && !voiceMode) {
-                  Taro.showModal({
-                    title: '语音播报不可用',
-                    content: `当前运行平台：${voiceSupport.platform}\n\n原因：${voiceSupport.reason || '未检测到语音合成能力'}\n\n您仍可以开启该选项，在支持的平台（如Chrome浏览器、微信小程序接入TTS后）会自动生效。`,
-                    confirmText: '仍然开启',
-                    cancelText: '取消'
-                  });
-                }
-                toggleVoiceMode();
-              }}
+              onClick={handleToggleVoice}
             />
           </View>
           <View className={styles.reminderSettings}>

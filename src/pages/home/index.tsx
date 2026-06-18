@@ -1,20 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, ScrollView, Input, Button } from '@tarojs/components';
+import { View, Text, ScrollView, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
-import { useAppStore } from '@/store/useAppStore';
+import { useAppStore, formatDate } from '@/store/useAppStore';
 import { hallList, tideWindows, getNearbyHall } from '@/data/halls';
 import { serviceCategories } from '@/data/services';
 import { currentQueueMock } from '@/data/queue';
 import HallCard from '@/components/HallCard';
 import QueueStatus from '@/components/QueueStatus';
-import { generateQueueNumber, generateId, getCrowdLevelText, getCrowdLevelColor } from '@/utils';
-import { Hall } from '@/types';
+import { getCrowdLevelText, getCrowdLevelColor } from '@/utils';
+import { Hall, RatingRecord } from '@/types';
 import styles from './index.module.scss';
 
 const HomePage: React.FC = () => {
-  const { currentQueue, setCurrentQueue, addQueue, elderMode, getHallRatings } = useAppStore();
-  const [searchText, setSearchText] = useState('');
+  const { currentQueue, setCurrentQueue, elderMode, getHallRatings } = useAppStore();
   const [refreshing, setRefreshing] = useState(false);
   const nearbyHall = getNearbyHall();
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -48,7 +47,7 @@ const HomePage: React.FC = () => {
     setShowDetailModal(true);
   };
 
-  const handleServiceClick = (categoryId: string) => {
+  const handleServiceClick = (_categoryId: string) => {
     Taro.switchTab({ url: '/pages/queue/index' });
   };
 
@@ -65,17 +64,19 @@ const HomePage: React.FC = () => {
     Taro.switchTab({ url: '/pages/queue/index' });
   };
 
-  const renderStars = (rating: number) => {
-    const full = Math.floor(rating);
-    const half = rating - full >= 0.5;
-    const empty = 5 - full - (half ? 1 : 0);
+  const renderStars = (rating: number, size: number = 24) => {
     return (
-      <Text style={{ color: '#FF9500' }}>
-        {'★'.repeat(full)}
-        {half && '⯨'}
-        {'☆'.repeat(empty)}
+      <Text style={{ color: '#FF9500', fontSize: size, letterSpacing: 2 }}>
+        {'★'.repeat(Math.floor(rating))}
+        {rating - Math.floor(rating) >= 0.5 && '⯨'}
+        {'☆'.repeat(5 - Math.floor(rating) - (rating - Math.floor(rating) >= 0.5 ? 1 : 0))}
       </Text>
     );
+  };
+
+  const getInitial = (str: string) => {
+    if (!str) return '评';
+    return str.charAt(0);
   };
 
   const quickActions = [
@@ -207,7 +208,7 @@ const HomePage: React.FC = () => {
         </View>
       </View>
 
-      {showDetailModal && selectedHall && (
+      {showDetailModal && selectedHall && hallRatingSummary && (
         <View className={styles.modalMask} onClick={() => setShowDetailModal(false)}>
           <View className={styles.detailModal} onClick={e => e.stopPropagation()}>
             <View className={styles.modalHeader}>
@@ -244,45 +245,65 @@ const HomePage: React.FC = () => {
               <View className={styles.ratingsSection}>
                 <View className={styles.ratingsHeader}>
                   <Text className={styles.ratingsTitle}>群众评价</Text>
-                  {hallRatingSummary && hallRatingSummary.totalCount > 0 && (
-                    <View className={styles.ratingsSummary}>
-                      <View style={{ display: 'flex', alignItems: 'center' }}>
-                        {renderStars(hallRatingSummary.avgRating)}
-                        <Text className={styles.ratingBigScore}>{hallRatingSummary.avgRating.toFixed(1)}</Text>
-                      </View>
-                      <Text className={styles.ratingCountText}>共 {hallRatingSummary.totalCount} 条评价</Text>
-                      <Text className={styles.ratingWaitText}>平均等待 {hallRatingSummary.avgWaitTime} 分钟</Text>
-                    </View>
-                  )}
                 </View>
 
-                {!hallRatingSummary || hallRatingSummary.totalCount === 0 ? (
+                {hallRatingSummary.totalCount === 0 ? (
                   <View className={styles.emptyRatings}>
                     <Text className={styles.emptyRatingIcon}>💬</Text>
                     <Text className={styles.emptyRatingText}>暂无评价，去办理后成为第一个评价的人吧~</Text>
                   </View>
                 ) : (
-                  <View className={styles.commentList}>
-                    {hallRatingSummary.recentComments.map((comment, idx) => (
-                      <View key={idx} className={styles.commentItem}>
-                        <View className={styles.commentHeader}>
-                          <View className={styles.commentAvatar}>
-                            {comment.hallName ? comment.hallName.charAt(0) : '群'}
-                          </View>
-                          <View className={styles.commentInfo}>
-                            <Text className={styles.commentService}>{comment.serviceName || '综合事项'}</Text>
-                            <View style={{ display: 'flex', alignItems: 'center' }}>
-                              {renderStars(comment.rating)}
-                              <Text className={styles.commentTime}>· {comment.date}</Text>
+                  <>
+                    <View className={styles.ratingsSummary}>
+                      <View className={styles.ratingScoreRow}>
+                        <Text className={styles.ratingBigScore}>{hallRatingSummary.avgRating.toFixed(1)}</Text>
+                        <View>
+                          <View>{renderStars(hallRatingSummary.avgRating)}</View>
+                          <Text className={styles.ratingCountText}>共 {hallRatingSummary.totalCount} 条评价</Text>
+                        </View>
+                      </View>
+                      <View className={styles.ratingWaitRow}>
+                        <Text className={styles.waitLabel}>平均等待</Text>
+                        <Text className={styles.waitValue}>
+                          {hallRatingSummary.avgWaitTime > 0
+                            ? `${hallRatingSummary.avgWaitTime} 分钟`
+                            : '暂无数据'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View className={styles.commentList}>
+                      {hallRatingSummary.recentComments.map((comment: RatingRecord, idx: number) => (
+                        <View key={idx} className={styles.commentItem}>
+                          <View className={styles.commentHeader}>
+                            <View className={styles.commentAvatar}>
+                              {getInitial(comment.serviceName)}
+                            </View>
+                            <View className={styles.commentInfo}>
+                              <Text className={styles.commentService}>
+                                {comment.serviceName || '综合事项'}
+                              </Text>
+                              <View className={styles.commentMetaRow}>
+                                <View className={styles.commentStarsRow}>
+                                  {renderStars(comment.rating, 20)}
+                                </View>
+                                <Text className={styles.commentTime}>· {formatDate(comment.timestamp)}</Text>
+                              </View>
                             </View>
                           </View>
+                          {typeof comment.waitMinutes === 'number' && comment.waitMinutes > 0 && (
+                            <View className={styles.commentWait}>
+                              <Text className={styles.commentWaitLabel}>等待反馈：</Text>
+                              <Text className={styles.commentWaitValue}>实际等待约 {comment.waitMinutes} 分钟</Text>
+                            </View>
+                          )}
+                          {comment.comment && (
+                            <Text className={styles.commentContent}>{comment.comment}</Text>
+                          )}
                         </View>
-                        {comment.comment && (
-                          <Text className={styles.commentContent}>{comment.comment}</Text>
-                        )}
-                      </View>
-                    ))}
-                  </View>
+                      ))}
+                    </View>
+                  </>
                 )}
               </View>
 

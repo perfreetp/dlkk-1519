@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { View, Text } from '@tarojs/components';
-import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import { Hall } from '@/types';
 import { useAppStore } from '@/store/useAppStore';

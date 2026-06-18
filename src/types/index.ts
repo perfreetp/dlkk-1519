@@ -71,4 +71,37 @@ export interface ServiceRecord {
   comment?: string;
 }
 
+export interface RatingRecord {
+  recordId: string;
+  rating: number;
+  comment: string;
+  timestamp: string;
+  hallName: string;
+  serviceName: string;
+  waitMinutes?: number;
+}
+
+export interface QueueTimelineEvent {
+  id: string;
+  queueId: string;
+  type: 'queue' | 'wait' | 'calling' | 'processing' | 'missed' | 'requeued' | 'completed' | 'info';
+  time: string;
+  title: string;
+  description?: string;
+}
+
+export interface HallRatingSummary {
+  avgRating: number;
+  totalCount: number;
+  recentComments: RatingRecord[];
+  avgWaitTime: number;
+}
+
+export interface VoiceSupportInfo {
+  supported: boolean;
+  platform: string;
+  method: 'webSpeech' | 'tts' | 'none';
+  reason?: string;
+}
+
 export type CrowdLevelType = 'low' | 'medium' | 'high';

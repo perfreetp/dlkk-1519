@@ -1,9 +1,8 @@
 import React from 'react';
 import { View, Text, Button } from '@tarojs/components';
-import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import { QueueRecord } from '@/types';
-import { getStatusText, getStatusColor } from '@/utils';
+import { getStatusText } from '@/utils';
 import styles from './index.module.scss';
 
 interface QueueStatusProps {

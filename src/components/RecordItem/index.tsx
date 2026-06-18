@@ -16,7 +16,7 @@ const RecordItem: React.FC<RecordItemProps> = ({ record, onRate, onClick }) => {
 
   const renderStars = (rating?: number) => {
     if (!rating) return null;
-    const stars = [];
+    const stars: React.ReactNode[] = [];
     for (let i = 0; i < 5; i++) {
       stars.push(
         <Text key={i} className={styles.star}>

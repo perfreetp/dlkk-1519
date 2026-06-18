@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import Taro from '@tarojs/taro';
-import { QueueRecord, Reminder, ServiceRecord } from '@/types';
-
-export interface RatingRecord {
-  recordId: string;
-  rating: number;
-  comment: string;
-  timestamp: string;
-}
+import {
+  QueueRecord,
+  Reminder,
+  RatingRecord,
+  QueueTimelineEvent,
+  HallRatingSummary,
+  VoiceSupportInfo
+} from '@/types';
 
 const STORAGE_KEYS = {
   ELDER_MODE: 'gov_queue_elder_mode',
@@ -41,12 +41,39 @@ const safeSetStorageSync = (key: string, value: any): void => {
   }
 };
 
-export const checkVoiceSupport = (): {
-  supported: boolean;
-  platform: string;
-  method: 'webSpeech' | 'tts' | 'none';
-  reason?: string;
-} => {
+const formatDateTime = (date: Date): string => {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+};
+
+const formatTimeShort = (dateStr: string): string => {
+  try {
+    const d = new Date(dateStr);
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  } catch {
+    return dateStr;
+  }
+};
+
+const formatDate = (dateStr: string): string => {
+  try {
+    const d = new Date(dateStr);
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const isToday = d.toDateString() === now.toDateString();
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = d.toDateString() === yesterday.toDateString();
+    if (isToday) return `今天 ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    if (isYesterday) return `昨天 ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return `${d.getMonth() + 1}月${d.getDate()}日 ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  } catch {
+    return dateStr;
+  }
+};
+
+export const checkVoiceSupport = (): VoiceSupportInfo => {
   try {
     const systemInfo = Taro.getSystemInfoSync();
     const platform = systemInfo.platform || 'unknown';
@@ -59,7 +86,7 @@ export const checkVoiceSupport = (): {
       };
     }
 
-    if (Taro.createInnerAudioContext) {
+    if (typeof Taro.createInnerAudioContext === 'function') {
       return {
         supported: true,
         platform: `${platform}-TTS`,
@@ -97,22 +124,6 @@ const textToAudioUrl = (text: string): string | null => {
   }
 };
 
-export interface QueueTimelineEvent {
-  id: string;
-  queueId: string;
-  type: 'queue' | 'wait' | 'calling' | 'processing' | 'missed' | 'requeued' | 'completed' | 'info';
-  time: string;
-  title: string;
-  description?: string;
-}
-
-export interface HallRatingSummary {
-  avgRating: number;
-  totalCount: number;
-  recentComments: Array<RatingRecord & { hallName: string; serviceName: string }>;
-  avgWaitTime: number;
-}
-
 interface AppState {
   elderMode: boolean;
   voiceMode: boolean;
@@ -122,9 +133,9 @@ interface AppState {
   unreadCount: number;
   ratings: RatingRecord[];
   queueTimeline: QueueTimelineEvent[];
-  voiceSupport: { supported: boolean; platform: string; method: 'webSpeech' | 'tts' | 'none'; reason?: string };
+  voiceSupport: VoiceSupportInfo;
   toggleElderMode: () => void;
-  toggleVoiceMode: () => { success: boolean; reason?: string };
+  toggleVoiceMode: () => Promise<{ success: boolean; reason?: string }>;
   setCurrentQueue: (queue: QueueRecord | null) => void;
   addQueue: (queue: QueueRecord) => void;
   requeue: (queueId: string) => void;
@@ -132,12 +143,16 @@ interface AppState {
   markReminderRead: (id: string) => void;
   markAllRemindersRead: () => void;
   addReminder: (reminder: Reminder) => void;
-  saveRating: (recordId: string, rating: number, comment: string, hallName?: string, serviceName?: string) => void;
+  saveRating: (recordId: string, rating: number, comment: string, hallName?: string, serviceName?: string, waitMinutes?: number) => void;
   getRating: (recordId: string) => RatingRecord | undefined;
   getHallRatings: (hallName: string) => HallRatingSummary;
   getServiceRatings: (serviceName: string) => { avgRating: number; totalCount: number };
   addTimelineEvent: (queueId: string, event: Omit<QueueTimelineEvent, 'id' | 'queueId' | 'time'>) => void;
   getTimelineForQueue: (queueId: string) => QueueTimelineEvent[];
+  simulateWaitProgress: () => void;
+  simulateCallNumber: () => void;
+  simulateMissed: () => void;
+  simulateProcessing: () => void;
   speak: (text: string) => Promise<{ success: boolean; reason?: string }>;
   initFromStorage: () => void;
 }
@@ -172,12 +187,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ elderMode: next });
     safeSetStorageSync(STORAGE_KEYS.ELDER_MODE, next);
     if (next && get().voiceMode) {
-      get().speak('已开启大字模式').catch(() => {});
+      get().speak('已开启大字模式').catch(() => { });
     }
   },
 
   toggleVoiceMode: async () => {
-    const next = !get().voiceMode;
+    const currentVoiceMode = get().voiceMode;
+    const next = !currentVoiceMode;
     const voiceSupport = get().voiceSupport;
 
     if (next && !voiceSupport.supported) {
@@ -197,32 +213,37 @@ export const useAppStore = create<AppState>((set, get) => ({
       return { success: false, reason: voiceSupport.reason };
     }
 
-    set({ voiceMode: next });
-    safeSetStorageSync(STORAGE_KEYS.VOICE_MODE, next);
+    if (!next) {
+      set({ voiceMode: false });
+      safeSetStorageSync(STORAGE_KEYS.VOICE_MODE, false);
+      get().speak('已关闭语音播报').catch(() => { });
+      return { success: true };
+    }
 
-    if (next) {
-      try {
-        const result = await get().speak('已开启语音播报，叫号时会提醒您');
-        if (!result.success) {
-          Taro.showModal({
-            title: '语音测试失败',
-            content: `已开启选项，但本次未能播放测试语音：${result.reason || '未知原因'}\n\n这可能是网络问题导致TTS服务不可达，在支持的平台下一次叫号时会重试。`,
-            showCancel: false,
-            confirmText: '我知道了'
-          });
-        }
-      } catch (e: any) {
+    try {
+      const testResult = await get().speak('语音播报测试成功，叫号时会提醒您');
+      if (testResult.success) {
+        set({ voiceMode: true });
+        safeSetStorageSync(STORAGE_KEYS.VOICE_MODE, true);
+        return { success: true };
+      } else {
         Taro.showModal({
-          title: '语音测试失败',
-          content: `已开启选项，但本次播放异常：${e?.message || '未知错误'}\n\n您可以在进度页点击「立即播报」按钮重试。`,
+          title: '语音播报开启失败',
+          content: `试播未能成功播放，已保持关闭状态。\n\n【平台】${voiceSupport.platform}\n【方式】${voiceSupport.method}\n【原因】${testResult.reason || '未知'}\n\n建议检查：\n1. 设备是否静音或音量过低\n2. 网络是否正常（TTS需联网）\n3. 小程序权限是否允许音频播放\n\n如确认无问题，可再次尝试开启。`,
           showCancel: false,
           confirmText: '我知道了'
         });
+        return { success: false, reason: testResult.reason };
       }
-    } else {
-      get().speak('已关闭语音播报').catch(() => {});
+    } catch (e: any) {
+      Taro.showModal({
+        title: '语音播报开启失败',
+        content: `试播时发生异常：${e?.message || '未知错误'}\n\n已保持关闭状态，请检查设备支持情况后重试。`,
+        showCancel: false,
+        confirmText: '我知道了'
+      });
+      return { success: false, reason: e?.message || '未知错误' };
     }
-    return { success: true };
   },
 
   setCurrentQueue: (queue) => {
@@ -233,12 +254,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   addTimelineEvent: (queueId, event) => {
     const { queueTimeline } = get();
     const now = new Date();
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    const timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     const newEvent: QueueTimelineEvent = {
       id: `tl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       queueId,
-      time: timeStr,
+      time: formatDateTime(now),
       ...event
     };
     const newTimeline = [newEvent, ...queueTimeline];
@@ -272,7 +291,134 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
 
     if (voiceMode) {
-      speak(`取号成功，您的号码是${queue.queueNumber}，${queue.serviceName}，前方还有${queue.waitCount}人等待，预计等待${queue.estimatedWaitTime}分钟`).catch(() => {});
+      speak(`取号成功，您的号码是${queue.queueNumber}，${queue.serviceName}，前方还有${queue.waitCount}人等待，预计等待${queue.estimatedWaitTime}分钟`).catch(() => { });
+    }
+  },
+
+  simulateWaitProgress: () => {
+    const { currentQueue, addTimelineEvent, voiceMode, speak } = get();
+    if (!currentQueue || currentQueue.status !== 'waiting') return;
+    if (currentQueue.waitCount <= 0) return;
+
+    const newWaitCount = Math.max(0, currentQueue.waitCount - 1);
+    const updatedQueue = { ...currentQueue, waitCount: newWaitCount };
+
+    set({ currentQueue: updatedQueue });
+    safeSetStorageSync(STORAGE_KEYS.CURRENT_QUEUE, updatedQueue);
+
+    const queueList = get().queueList.map(q =>
+      q.id === currentQueue.id ? { ...q, waitCount: newWaitCount } : q
+    );
+    set({ queueList });
+    safeSetStorageSync(STORAGE_KEYS.QUEUE_LIST, queueList);
+
+    addTimelineEvent(currentQueue.id, {
+      type: 'wait',
+      title: '前方人数减少',
+      description: `前方还有${newWaitCount}人等待，距离叫号更近了一步`
+    });
+
+    if (newWaitCount <= 3 && newWaitCount > 0 && voiceMode) {
+      speak(`前方还有${newWaitCount}人，快要轮到您了，请做好准备`).catch(() => { });
+    }
+  },
+
+  simulateCallNumber: () => {
+    const { currentQueue, addTimelineEvent, addReminder, voiceMode, speak } = get();
+    if (!currentQueue || currentQueue.status !== 'waiting') return;
+
+    const updatedQueue = {
+      ...currentQueue,
+      status: 'calling' as const,
+      windowNumber: String(Math.floor(Math.random() * 15) + 1).padStart(2, '0') + '号窗',
+      callTime: formatDateTime(new Date())
+    };
+
+    set({ currentQueue: updatedQueue });
+    safeSetStorageSync(STORAGE_KEYS.CURRENT_QUEUE, updatedQueue);
+
+    const queueList = get().queueList.map(q =>
+      q.id === currentQueue.id ? updatedQueue : q
+    );
+    set({ queueList });
+    safeSetStorageSync(STORAGE_KEYS.QUEUE_LIST, queueList);
+
+    addTimelineEvent(currentQueue.id, {
+      type: 'calling',
+      title: '即将叫号',
+      description: `请前往${updatedQueue.windowNumber}办理，您的号码${currentQueue.queueNumber}`
+    });
+
+    addReminder({
+      id: `rem-${Date.now()}`,
+      type: 'call',
+      title: '叫号提醒',
+      content: `请前往${updatedQueue.windowNumber}办理，您的号码${currentQueue.queueNumber}`,
+      time: formatDateTime(new Date()),
+      read: false,
+      relatedQueueId: currentQueue.id
+    });
+
+    if (voiceMode) {
+      speak(`叫号提醒，${currentQueue.queueNumber}号，请前往${updatedQueue.windowNumber}办理业务`).catch(() => { });
+    }
+  },
+
+  simulateMissed: () => {
+    const { currentQueue, addTimelineEvent, voiceMode, speak } = get();
+    if (!currentQueue || (currentQueue.status !== 'calling' && currentQueue.status !== 'waiting')) return;
+
+    const updatedQueue = {
+      ...currentQueue,
+      status: 'missed' as const
+    };
+
+    set({ currentQueue: updatedQueue });
+    safeSetStorageSync(STORAGE_KEYS.CURRENT_QUEUE, updatedQueue);
+
+    const queueList = get().queueList.map(q =>
+      q.id === currentQueue.id ? updatedQueue : q
+    );
+    set({ queueList });
+    safeSetStorageSync(STORAGE_KEYS.QUEUE_LIST, queueList);
+
+    addTimelineEvent(currentQueue.id, {
+      type: 'missed',
+      title: '已过号',
+      description: '您错过了本次叫号，可在服务台申请重新排队'
+    });
+
+    if (voiceMode) {
+      speak('您已过号，请到服务台申请重新排队').catch(() => { });
+    }
+  },
+
+  simulateProcessing: () => {
+    const { currentQueue, addTimelineEvent, voiceMode, speak } = get();
+    if (!currentQueue || currentQueue.status !== 'calling') return;
+
+    const updatedQueue = {
+      ...currentQueue,
+      status: 'processing' as const
+    };
+
+    set({ currentQueue: updatedQueue });
+    safeSetStorageSync(STORAGE_KEYS.CURRENT_QUEUE, updatedQueue);
+
+    const queueList = get().queueList.map(q =>
+      q.id === currentQueue.id ? updatedQueue : q
+    );
+    set({ queueList });
+    safeSetStorageSync(STORAGE_KEYS.QUEUE_LIST, queueList);
+
+    addTimelineEvent(currentQueue.id, {
+      type: 'processing',
+      title: '办理中',
+      description: '您已到窗口，正在办理业务，请耐心等待'
+    });
+
+    if (voiceMode) {
+      speak('正在为您办理业务，请稍候').catch(() => { });
     }
   },
 
@@ -304,7 +450,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
 
     if (voiceMode) {
-      speak('已为您重新排号，前方还有3人，请留意叫号').catch(() => {});
+      speak('已为您重新排号，前方还有3人，请留意叫号').catch(() => { });
     }
   },
 
@@ -376,20 +522,21 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
 
     if (voiceMode && reminder.type === 'call') {
-      speak(reminder.content).catch(() => {});
+      speak(reminder.content).catch(() => { });
     }
   },
 
-  saveRating: (recordId, rating, comment, hallName = '', serviceName = '') => {
+  saveRating: (recordId, rating, comment, hallName = '', serviceName = '', waitMinutes) => {
     const { ratings, voiceMode, speak } = get();
     const existingIndex = ratings.findIndex(r => r.recordId === recordId);
-    const newRating: RatingRecord & { hallName?: string; serviceName?: string } = {
+    const newRating: RatingRecord = {
       recordId,
       rating,
       comment,
       timestamp: new Date().toISOString(),
       hallName,
-      serviceName
+      serviceName,
+      waitMinutes: waitMinutes ?? undefined
     };
     let newRatings;
     if (existingIndex >= 0) {
@@ -401,7 +548,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ ratings: newRatings });
     safeSetStorageSync(STORAGE_KEYS.RATINGS, newRatings);
     if (voiceMode) {
-      speak('评价提交成功，感谢您的反馈').catch(() => {});
+      speak('评价提交成功，感谢您的反馈').catch(() => { });
     }
   },
 
@@ -410,35 +557,28 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   getHallRatings: (hallName) => {
-    const all = get().ratings.filter(r => {
-      const rr = r as any;
-      return rr.hallName === hallName;
-    });
+    const all = get().ratings.filter(r => r.hallName === hallName);
     if (all.length === 0) {
       return { avgRating: 0, totalCount: 0, recentComments: [], avgWaitTime: 0 };
     }
     const avgRating = all.reduce((s, r) => s + r.rating, 0) / all.length;
+    const waitTimes = all.filter(r => typeof r.waitMinutes === 'number').map(r => r.waitMinutes as number);
+    const avgWaitTime = waitTimes.length > 0
+      ? Math.round(waitTimes.reduce((s, w) => s + w, 0) / waitTimes.length)
+      : 0;
     const recent = [...all]
       .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
-      .slice(0, 5)
-      .map(r => ({
-        ...r,
-        hallName: (r as any).hallName || hallName,
-        serviceName: (r as any).serviceName || ''
-      }));
+      .slice(0, 5);
     return {
       avgRating: Math.round(avgRating * 10) / 10,
       totalCount: all.length,
       recentComments: recent,
-      avgWaitTime: 15
+      avgWaitTime
     };
   },
 
   getServiceRatings: (serviceName) => {
-    const all = get().ratings.filter(r => {
-      const rr = r as any;
-      return rr.serviceName === serviceName;
-    });
+    const all = get().ratings.filter(r => r.serviceName === serviceName);
     if (all.length === 0) return { avgRating: 0, totalCount: 0 };
     return {
       avgRating: Math.round(all.reduce((s, r) => s + r.rating, 0) / all.length * 10) / 10,
@@ -450,66 +590,105 @@ export const useAppStore = create<AppState>((set, get) => ({
     const voiceSupport = get().voiceSupport;
 
     if (typeof window !== 'undefined' && (window as any).speechSynthesis) {
-      try {
-        const synth = (window as any).speechSynthesis;
-        synth.cancel();
-        const utterance = new (window as any).SpeechSynthesisUtterance(text);
-        utterance.lang = 'zh-CN';
-        utterance.rate = 0.95;
-        utterance.pitch = 1;
-        utterance.volume = 1;
+      return new Promise((resolve) => {
+        try {
+          const synth = (window as any).speechSynthesis;
+          synth.cancel();
+          const utterance = new (window as any).SpeechSynthesisUtterance(text);
+          utterance.lang = 'zh-CN';
+          utterance.rate = 0.95;
+          utterance.pitch = 1;
+          utterance.volume = 1;
 
-        const voices = synth.getVoices();
-        const zhVoice = voices.find((v: any) => v.lang && v.lang.toLowerCase().startsWith('zh'));
-        if (zhVoice) {
-          utterance.voice = zhVoice;
+          const voices = synth.getVoices();
+          const zhVoice = voices.find((v: any) => v.lang && v.lang.toLowerCase().startsWith('zh'));
+          if (zhVoice) {
+            utterance.voice = zhVoice;
+          }
+
+          let finished = false;
+          const finish = (success: boolean, reason?: string) => {
+            if (finished) return;
+            finished = true;
+            resolve({ success, reason });
+          };
+
+          utterance.onend = () => finish(true);
+          utterance.onerror = (e: any) => finish(false, `Web Speech错误：${e?.error || e?.message || '未知'}`);
+
+          setTimeout(() => {
+            if (!finished) finish(false, 'Web Speech播放超时');
+          }, 10000);
+
+          synth.speak(utterance);
+        } catch (e: any) {
+          resolve({ success: false, reason: `Web Speech初始化失败：${e?.message || '未知'}` });
         }
-        synth.speak(utterance);
-        return Promise.resolve({ success: true });
-      } catch (e) {
-        console.error('Web Speech 播报失败，尝试TTS:', e);
-      }
+      });
     }
 
     try {
       if (Taro.createInnerAudioContext) {
         const audioUrl = textToAudioUrl(text);
-        if (audioUrl) {
-          if (!innerAudioContext) {
-            innerAudioContext = Taro.createInnerAudioContext();
-          }
+        if (!audioUrl) {
+          return Promise.resolve({ success: false, reason: 'TTS URL生成失败' });
+        }
+
+        if (!innerAudioContext) {
+          innerAudioContext = Taro.createInnerAudioContext();
+        }
+
+        return new Promise((resolve) => {
+          let resolved = false;
           let hasError = false;
           let errorMsg = '';
+
+          const finish = (success: boolean, reason?: string) => {
+            if (resolved) return;
+            resolved = true;
+            resolve({ success, reason });
+          };
+
           innerAudioContext.onError((err: any) => {
             hasError = true;
             errorMsg = err?.errMsg || JSON.stringify(err);
             console.error('TTS音频播放错误:', err);
+            finish(false, `TTS播放失败：${errorMsg}`);
           });
-          innerAudioContext.stop();
-          innerAudioContext.src = audioUrl;
-          innerAudioContext.autoplay = false;
 
-          return new Promise<any>((resolve) => {
-            const timer = setTimeout(() => {
-              resolve({ success: false, reason: hasError ? `TTS播放失败：${errorMsg}` : 'TTS播放超时' });
-            }, 8000);
-
-            innerAudioContext.onCanplay(() => {
-              clearTimeout(timer);
-              try {
-                innerAudioContext.play();
-                resolve({ success: true });
-              } catch (playErr: any) {
-                resolve({ success: false, reason: `TTS启动失败：${playErr?.message || JSON.stringify(playErr)}` });
-              }
-            });
+          innerAudioContext.onEnded(() => {
+            finish(true);
           });
-        }
-        return Promise.resolve({ success: false, reason: 'TTS URL生成失败' });
+
+          try {
+            innerAudioContext.stop();
+            innerAudioContext.src = audioUrl;
+            innerAudioContext.autoplay = false;
+          } catch (e: any) {
+            finish(false, `TTS设置失败：${e?.message || JSON.stringify(e)}`);
+            return;
+          }
+
+          const timer = setTimeout(() => {
+            if (!resolved) {
+              finish(false, hasError ? `TTS播放失败：${errorMsg}` : 'TTS播放超时（8秒）');
+            }
+          }, 8000);
+
+          innerAudioContext.onCanplay(() => {
+            if (resolved) return;
+            clearTimeout(timer);
+            try {
+              innerAudioContext.play();
+            } catch (playErr: any) {
+              finish(false, `TTS启动播放失败：${playErr?.message || JSON.stringify(playErr)}`);
+            }
+          });
+        });
       }
     } catch (e: any) {
       console.error('小程序音频播报失败:', e);
-      return Promise.resolve({ success: false, reason: e?.message || 'TTS服务异常' });
+      return Promise.resolve({ success: false, reason: `TTS服务异常：${e?.message || '未知'}` });
     }
 
     return Promise.resolve({
@@ -518,3 +697,5 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
   }
 }));
+
+export { formatTimeShort, formatDate };
