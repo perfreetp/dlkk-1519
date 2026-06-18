@@ -9,10 +9,11 @@ import styles from './index.module.scss';
 interface HallCardProps {
   hall: Hall;
   showNearbyBadge?: boolean;
+  elderMode?: boolean;
   onClick?: () => void;
 }
 
-const HallCard: React.FC<HallCardProps> = ({ hall, showNearbyBadge = false, onClick }) => {
+const HallCard: React.FC<HallCardProps> = ({ hall, showNearbyBadge = false, elderMode, onClick }) => {
   const crowdColor = getCrowdLevelColor(hall.crowdLevel);
 
   const handleClick = () => {
@@ -23,7 +24,7 @@ const HallCard: React.FC<HallCardProps> = ({ hall, showNearbyBadge = false, onCl
 
   return (
     <View
-      className={classnames(styles.hallCard, showNearbyBadge && hall.isNearby && styles.nearby)}
+      className={classnames(styles.hallCard, showNearbyBadge && hall.isNearby && styles.nearby, elderMode && styles.elderMode)}
       onClick={handleClick}
     >
       <View className={styles.hallHeader}>

@@ -106,3 +106,37 @@
   color: $color-primary;
   font-weight: $font-weight-semibold;
 }
+
+.elderMode {
+  padding: 40rpx !important;
+
+  .hallName {
+    font-size: 34rpx !important;
+  }
+  .nearbyBadge {
+    font-size: 26rpx !important;
+    padding: 6rpx 16rpx !important;
+  }
+  .hallType {
+    font-size: 26rpx !important;
+    padding: 6rpx 14rpx !important;
+  }
+  .hallAddress {
+    font-size: 28rpx !important;
+  }
+  .distance {
+    font-size: 28rpx !important;
+  }
+  .crowdLabel {
+    font-size: 26rpx !important;
+  }
+  .crowdValue {
+    font-size: 32rpx !important;
+  }
+  .windowInfo {
+    font-size: 28rpx !important;
+  }
+  .windowCount {
+    font-size: 28rpx !important;
+  }
+}

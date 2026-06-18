@@ -235,3 +235,56 @@
     transform: scale(0.98);
   }
 }
+
+.elderMode {
+  .location {
+    font-size: 32rpx !important;
+  }
+  .searchPlaceholder {
+    font-size: 30rpx !important;
+  }
+  .searchIcon {
+    font-size: 32rpx !important;
+  }
+  .titleText {
+    font-size: 36rpx !important;
+  }
+  .moreText {
+    font-size: 28rpx !important;
+  }
+  .actionIcon {
+    width: 110rpx !important;
+    height: 110rpx !important;
+    font-size: 48rpx !important;
+  }
+  .actionText {
+    font-size: 30rpx !important;
+  }
+  .emptyIcon {
+    font-size: 140rpx !important;
+  }
+  .emptyText {
+    font-size: 32rpx !important;
+  }
+  .emptyBtn {
+    height: 110rpx !important;
+    font-size: 32rpx !important;
+    padding: 0 64rpx !important;
+  }
+  .tideTitle {
+    font-size: 34rpx !important;
+  }
+  .tideIcon {
+    font-size: 36rpx !important;
+  }
+  .tideWindow {
+    font-size: 30rpx !important;
+  }
+  .tideService {
+    font-size: 28rpx !important;
+  }
+  .tideStatus {
+    font-size: 26rpx !important;
+    padding: 6rpx 16rpx !important;
+  }
+}

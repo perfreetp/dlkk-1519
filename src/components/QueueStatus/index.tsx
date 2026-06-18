@@ -9,6 +9,7 @@ import styles from './index.module.scss';
 interface QueueStatusProps {
   queue: QueueRecord;
   showActions?: boolean;
+  elderMode?: boolean;
   onRequeue?: () => void;
   onViewDetail?: () => void;
 }
@@ -16,6 +17,7 @@ interface QueueStatusProps {
 const QueueStatus: React.FC<QueueStatusProps> = ({
   queue,
   showActions = false,
+  elderMode,
   onRequeue,
   onViewDetail
 }) => {
@@ -23,7 +25,7 @@ const QueueStatus: React.FC<QueueStatusProps> = ({
   const isMissed = queue.status === 'missed';
 
   return (
-    <View className={styles.queueCard}>
+    <View className={classnames(styles.queueCard, elderMode && styles.elderMode)}>
       <View className={styles.queueHeader}>
         <Text className={styles.queueService}>{queue.serviceName}</Text>
         <Text className={styles.statusBadge}>{getStatusText(queue.status)}</Text>

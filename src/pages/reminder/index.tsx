@@ -17,7 +17,7 @@ const filterOptions = [
 ];
 
 const ReminderPage: React.FC = () => {
-  const { reminders, addReminder, markReminderRead, unreadCount } = useAppStore();
+  const { reminders, addReminder, markReminderRead, markAllRemindersRead, unreadCount, elderMode } = useAppStore();
   const [activeFilter, setActiveFilter] = useState('all');
 
   useEffect(() => {
@@ -33,14 +33,20 @@ const ReminderPage: React.FC = () => {
     : reminders.filter(r => r.type === activeFilter);
 
   const handleMarkAll = () => {
-    filteredReminders.forEach(r => {
-      if (!r.read) {
-        markReminderRead(r.id);
+    Taro.showModal({
+      title: '标记全部已读',
+      content: '确认将所有消息标记为已读吗？',
+      confirmText: '全部已读',
+      confirmColor: '#165dff',
+      success: (res) => {
+        if (res.confirm) {
+          markAllRemindersRead();
+          Taro.showToast({
+            title: '已全部标为已读',
+            icon: 'success'
+          });
+        }
       }
-    });
-    Taro.showToast({
-      title: '已全部标为已读',
-      icon: 'success'
     });
   };
 
@@ -60,7 +66,7 @@ const ReminderPage: React.FC = () => {
   const highlightReminder = filteredReminders.find(r => r.type === 'call' && !r.read);
 
   return (
-    <ScrollView className={styles.page} scrollY>
+    <ScrollView className={classnames(styles.page, elderMode && styles.elderMode)} scrollY>
       <View className={styles.header}>
         <View className={styles.headerBar}>
           <Text className={styles.title}>消息提醒</Text>
@@ -101,6 +107,7 @@ const ReminderPage: React.FC = () => {
               <ReminderItem
                 key={reminder.id}
                 reminder={reminder}
+                elderMode={elderMode}
                 onClick={() => handleReminderClick(reminder)}
               />
             ))}

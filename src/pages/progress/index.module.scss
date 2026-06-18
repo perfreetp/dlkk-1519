@@ -344,3 +344,93 @@
   color: $color-warning;
   line-height: 1.5;
 }
+
+.broadcastBtn {
+  @include button-reset;
+  height: 56rpx;
+  padding: 0 $spacing-md;
+  border-radius: $radius-button;
+  background: $color-primary-bg;
+  color: $color-primary;
+  font-size: $font-size-sm;
+  border: none;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.elderMode {
+  :global {
+    font-size: 1.3em;
+  }
+
+  .serviceName {
+    font-size: 36rpx !important;
+  }
+  .statusBadge {
+    font-size: 28rpx !important;
+    padding: 8rpx 20rpx !important;
+  }
+  .numberLabel {
+    font-size: 32rpx !important;
+  }
+  .numberValue {
+    font-size: 120rpx !important;
+  }
+  .statValue {
+    font-size: 44rpx !important;
+  }
+  .statLabel {
+    font-size: 28rpx !important;
+  }
+  .infoRow {
+    font-size: 30rpx !important;
+  }
+  .sectionTitle {
+    font-size: 34rpx !important;
+  }
+  .materialItem {
+    font-size: 30rpx !important;
+  }
+  .reminderText {
+    font-size: 30rpx !important;
+  }
+  .reminderDesc {
+    font-size: 26rpx !important;
+  }
+  .actionBtn {
+    height: 110rpx !important;
+    font-size: 32rpx !important;
+  }
+  .switch {
+    width: 100rpx !important;
+    height: 56rpx !important;
+
+    &::after {
+      width: 48rpx !important;
+      height: 48rpx !important;
+    }
+
+    &.active::after {
+      left: 48rpx !important;
+    }
+  }
+  .emptyTitle {
+    font-size: 36rpx !important;
+  }
+  .emptyDesc {
+    font-size: 30rpx !important;
+  }
+  .emptyBtn {
+    height: 110rpx !important;
+    font-size: 32rpx !important;
+  }
+  .tipText {
+    font-size: 30rpx !important;
+  }
+  .broadcastBtn {
+    height: 64rpx !important;
+    font-size: 28rpx !important;
+  }
+}

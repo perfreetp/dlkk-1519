@@ -71,3 +71,26 @@
   background: $color-error;
   border-radius: 50%;
 }
+
+.elderMode {
+  padding: 40rpx !important;
+
+  .iconWrapper {
+    width: 96rpx !important;
+    height: 96rpx !important;
+    font-size: 44rpx !important;
+  }
+  .title {
+    font-size: 34rpx !important;
+  }
+  .time {
+    font-size: 26rpx !important;
+  }
+  .desc {
+    font-size: 30rpx !important;
+  }
+  .unreadDot {
+    width: 20rpx !important;
+    height: 20rpx !important;
+  }
+}

@@ -6,6 +6,7 @@ import styles from './index.module.scss';
 
 interface ReminderItemProps {
   reminder: Reminder;
+  elderMode?: boolean;
   onClick?: () => void;
 }
 
@@ -16,9 +17,9 @@ const iconMap: Record<string, string> = {
   system: '📢'
 };
 
-const ReminderItem: React.FC<ReminderItemProps> = ({ reminder, onClick }) => {
+const ReminderItem: React.FC<ReminderItemProps> = ({ reminder, elderMode, onClick }) => {
   return (
-    <View className={styles.reminderItem} onClick={onClick}>
+    <View className={classnames(styles.reminderItem, elderMode && styles.elderMode)} onClick={onClick}>
       <View className={classnames(styles.iconWrapper, styles[reminder.type])}>
         <Text>{iconMap[reminder.type] || '📢'}</Text>
       </View>

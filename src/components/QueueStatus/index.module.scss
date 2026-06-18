@@ -121,3 +121,37 @@
   border: 2rpx solid rgba(255, 255, 255, 0.5);
   color: $color-text-white;
 }
+
+.elderMode {
+  padding: 56rpx !important;
+
+  .queueService {
+    font-size: 36rpx !important;
+  }
+  .statusBadge {
+    font-size: 28rpx !important;
+    padding: 10rpx 24rpx !important;
+  }
+  .numberLabel {
+    font-size: 30rpx !important;
+  }
+  .numberValue {
+    font-size: 100rpx !important;
+  }
+  .statValue {
+    font-size: 44rpx !important;
+  }
+  .statLabel {
+    font-size: 26rpx !important;
+  }
+  .hallInfo {
+    font-size: 30rpx !important;
+  }
+  .timeInfo {
+    font-size: 28rpx !important;
+  }
+  .btn {
+    height: 100rpx !important;
+    font-size: 30rpx !important;
+  }
+}

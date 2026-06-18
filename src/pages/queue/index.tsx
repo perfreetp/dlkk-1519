@@ -86,7 +86,7 @@ const QueuePage: React.FC = () => {
   };
 
   return (
-    <ScrollView className={styles.page} scrollY>
+    <ScrollView className={classnames(styles.page, elderMode && styles.elderMode)} scrollY>
       <View className={styles.hallSelector} onClick={() => setShowHallPicker(true)}>
         <Text className={styles.hallLabel}>办理大厅：</Text>
         <Text className={styles.hallName}>{selectedHall.name}</Text>

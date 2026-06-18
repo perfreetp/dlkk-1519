@@ -4,15 +4,24 @@ import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
 import { serviceList } from '@/data/services';
+import { hallList } from '@/data/halls';
 import { getStatusText } from '@/utils';
 import styles from './index.module.scss';
 
 const ProgressPage: React.FC = () => {
-  const { currentQueue, requeue, elderMode, voiceMode, toggleVoiceMode } = useAppStore();
+  const {
+    currentQueue,
+    requeue,
+    cancelCurrentQueue,
+    voiceMode,
+    toggleVoiceMode,
+    elderMode,
+    speak
+  } = useAppStore();
   const [callReminder, setCallReminder] = useState(true);
-  const [materialReminder, setMaterialReminder] = useState(true);
 
   const currentService = serviceList.find(s => s.name === currentQueue?.serviceName);
+  const currentHall = hallList.find(h => h.id === currentQueue?.hallId);
 
   const handleRequeue = () => {
     if (!currentQueue) return;
@@ -36,13 +45,17 @@ const ProgressPage: React.FC = () => {
   const handleCancelQueue = () => {
     Taro.showModal({
       title: '取消取号',
-      content: '确定要取消当前排队号码吗？',
+      content: '确定要取消当前排队号码吗？取消后需要重新取号。',
       confirmText: '取消取号',
       confirmColor: '#f53f3f',
       success: (res) => {
         if (res.confirm) {
+          cancelCurrentQueue();
+          if (voiceMode) {
+            speak('已取消取号');
+          }
           Taro.showToast({
-            title: '已取消',
+            title: '已取消取号',
             icon: 'success'
           });
         }
@@ -54,9 +67,57 @@ const ProgressPage: React.FC = () => {
     Taro.switchTab({ url: '/pages/queue/index' });
   };
 
+  const handleGoHome = () => {
+    Taro.switchTab({ url: '/pages/home/index' });
+  };
+
+  const handleNavigate = () => {
+    if (!currentHall) {
+      Taro.showToast({ title: '未找到大厅信息', icon: 'none' });
+      return;
+    }
+    Taro.showActionSheet({
+      itemList: [
+        `打开地图导航到${currentHall.name}`,
+        `查看${currentHall.name}详情`,
+        '复制大厅地址'
+      ],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          Taro.showToast({
+            title: `正在导航到${currentHall.name}`,
+            icon: 'none',
+            duration: 2000
+          });
+          if (voiceMode) {
+            speak(`正在为您导航到${currentHall.name}`);
+          }
+        } else if (res.tapIndex === 1) {
+          Taro.switchTab({ url: '/pages/home/index' });
+        } else if (res.tapIndex === 2) {
+          Taro.setClipboardData({
+            data: currentHall.address,
+            success: () => {
+              Taro.showToast({ title: '地址已复制', icon: 'success' });
+            }
+          });
+        }
+      }
+    });
+  };
+
+  const handleBroadcast = () => {
+    if (currentQueue) {
+      speak(`您的号码${currentQueue.queueNumber}，前方还有${currentQueue.waitCount}人等待`);
+    }
+  };
+
   if (!currentQueue) {
     return (
-      <ScrollView className={styles.page} scrollY>
+      <ScrollView
+        className={classnames(styles.page, elderMode && styles.elderMode)}
+        scrollY
+      >
         <View className={styles.emptyState}>
           <Text className={styles.emptyIcon}>🎫</Text>
           <Text className={styles.emptyTitle}>暂无排队中</Text>
@@ -73,7 +134,10 @@ const ProgressPage: React.FC = () => {
   const isWaiting = currentQueue.status === 'waiting' || currentQueue.status === 'requeued';
 
   return (
-    <ScrollView className={styles.page} scrollY>
+    <ScrollView
+      className={classnames(styles.page, elderMode && styles.elderMode)}
+      scrollY
+    >
       <View className={styles.content}>
         <View className={styles.queueCard}>
           <View className={styles.queueHeader}>
@@ -153,7 +217,12 @@ const ProgressPage: React.FC = () => {
             </View>
             <View
               className={classnames(styles.switch, callReminder && styles.active)}
-              onClick={() => setCallReminder(!callReminder)}
+              onClick={() => {
+                setCallReminder(!callReminder);
+                if (voiceMode && !callReminder) {
+                  speak('已开启叫号提醒');
+                }
+              }}
             />
           </View>
           <View className={styles.reminderSettings}>
@@ -166,13 +235,25 @@ const ProgressPage: React.FC = () => {
               onClick={toggleVoiceMode}
             />
           </View>
+          <View className={styles.reminderSettings}>
+            <View>
+              <Text className={styles.reminderText}>立即播报</Text>
+              <Text className={styles.reminderDesc}>点击立即播报当前排队状态</Text>
+            </View>
+            <Button className={styles.broadcastBtn} onClick={handleBroadcast}>
+              🔊 播报
+            </Button>
+          </View>
         </View>
       </View>
 
       <View className={styles.actionBar}>
         {isMissed ? (
           <>
-            <Button className={classnames(styles.actionBtn, styles.btnSecondary)}>
+            <Button
+              className={classnames(styles.actionBtn, styles.btnSecondary)}
+              onClick={handleGoHome}
+            >
               返回大厅
             </Button>
             <Button
@@ -190,7 +271,10 @@ const ProgressPage: React.FC = () => {
             >
               取消取号
             </Button>
-            <Button className={classnames(styles.actionBtn, styles.btnPrimary)}>
+            <Button
+              className={classnames(styles.actionBtn, styles.btnPrimary)}
+              onClick={handleNavigate}
+            >
               导航到大厅
             </Button>
           </>

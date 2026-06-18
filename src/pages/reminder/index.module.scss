@@ -119,3 +119,31 @@
   margin-top: $spacing-sm;
   text-align: right;
 }
+
+.elderMode {
+  .title {
+    font-size: 36rpx !important;
+  }
+  .markAll {
+    font-size: 30rpx !important;
+  }
+  .filterTab {
+    font-size: 30rpx !important;
+    padding: 16rpx 28rpx !important;
+  }
+  .highlightTitle {
+    font-size: 34rpx !important;
+  }
+  .highlightContent {
+    font-size: 30rpx !important;
+  }
+  .highlightTime {
+    font-size: 26rpx !important;
+  }
+  .emptyText {
+    font-size: 30rpx !important;
+  }
+  .emptyIcon {
+    font-size: 140rpx !important;
+  }
+}

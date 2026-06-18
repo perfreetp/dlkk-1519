@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Input, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
+import classnames from 'classnames';
 import { useAppStore } from '@/store/useAppStore';
 import { hallList, tideWindows, getNearbyHall } from '@/data/halls';
 import { serviceCategories } from '@/data/services';
@@ -59,7 +60,7 @@ const HomePage: React.FC = () => {
 
   return (
     <ScrollView
-      className={styles.page}
+      className={classnames(styles.page, elderMode && styles.elderMode)}
       scrollY
       refresherEnabled
       refresherTriggered={refreshing}
@@ -88,6 +89,7 @@ const HomePage: React.FC = () => {
             <QueueStatus
               queue={currentQueue}
               showActions
+              elderMode={elderMode}
               onViewDetail={handleViewQueueDetail}
             />
           </View>
@@ -124,6 +126,7 @@ const HomePage: React.FC = () => {
               key={hall.id}
               hall={hall}
               showNearbyBadge
+              elderMode={elderMode}
               onClick={() => handleHallClick(hall.id)}
             />
           ))}

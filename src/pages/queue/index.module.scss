@@ -263,3 +263,59 @@
   background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
   color: $color-text-white;
 }
+
+.elderMode {
+  .hallLabel {
+    font-size: 30rpx !important;
+  }
+  .hallName {
+    font-size: 32rpx !important;
+  }
+  .searchInput {
+    font-size: 30rpx !important;
+  }
+  .searchIcon {
+    font-size: 32rpx !important;
+  }
+  .categoryTab {
+    font-size: 30rpx !important;
+    padding: 16rpx 28rpx !important;
+  }
+  .serviceName {
+    font-size: 32rpx !important;
+  }
+  .onlineBadge {
+    font-size: 26rpx !important;
+    padding: 4rpx 12rpx !important;
+  }
+  .timeText {
+    font-size: 28rpx !important;
+  }
+  .serviceIcon {
+    width: 96rpx !important;
+    height: 96rpx !important;
+    font-size: 44rpx !important;
+  }
+  .serviceArrow {
+    font-size: 40rpx !important;
+  }
+  .modalTitle {
+    font-size: 38rpx !important;
+  }
+  .modalSectionTitle {
+    font-size: 34rpx !important;
+  }
+  .infoLabel {
+    font-size: 30rpx !important;
+  }
+  .infoValue {
+    font-size: 30rpx !important;
+  }
+  .materialItem {
+    font-size: 30rpx !important;
+  }
+  .modalBtn {
+    height: 110rpx !important;
+    font-size: 32rpx !important;
+  }
+}

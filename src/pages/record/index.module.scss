@@ -134,6 +134,11 @@
   align-items: center;
 }
 
+.settingHint {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
 .settingArrow {
   color: $color-text-tertiary;
   font-size: $font-size-md;
@@ -193,6 +198,105 @@
 .recordList {
   display: flex;
   flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.recordCard {
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+}
+
+.recordHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.recordService {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+  flex: 1;
+  margin-right: $spacing-sm;
+}
+
+.recordStatus {
+  font-size: $font-size-xs;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+  white-space: nowrap;
+}
+
+.statusCompleted {
+  background: $color-success-bg;
+  color: $color-success;
+}
+
+.statusIncomplete {
+  background: $color-error-bg;
+  color: $color-error;
+}
+
+.recordInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.recordHall {
+  @include text-ellipsis;
+  flex: 1;
+}
+
+.recordQueue {
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+  margin-left: $spacing-md;
+}
+
+.recordRating {
+  margin-bottom: $spacing-sm;
+  padding-top: $spacing-sm;
+  border-top: 1rpx solid $color-divider;
+}
+
+.recordComment {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-top: 8rpx;
+  line-height: 1.4;
+}
+
+.recordFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recordDate {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.rateBtn {
+  @include button-reset;
+  height: 48rpx;
+  padding: 0 $spacing-md;
+  border-radius: $radius-round;
+  font-size: $font-size-xs;
+  background: $color-primary-bg;
+  color: $color-primary;
+  border: none;
+
+  &:active {
+    opacity: 0.8;
+  }
 }
 
 .moreLink {
@@ -235,23 +339,46 @@
   font-weight: $font-weight-semibold;
   color: $color-text-primary;
   text-align: center;
+  margin-bottom: $spacing-sm;
+}
+
+.ratingService {
+  text-align: center;
   margin-bottom: $spacing-lg;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
 }
 
 .ratingStars {
   display: flex;
   justify-content: center;
   gap: $spacing-lg;
-  margin-bottom: $spacing-xl;
+  margin-bottom: $spacing-sm;
 }
 
 .star {
   font-size: 64rpx;
   color: $color-text-disabled;
+  transition: all $transition-fast;
 
-  &.active {
+  &.starActive {
     color: $color-warning;
   }
+
+  &:active {
+    transform: scale(1.2);
+  }
+}
+
+.ratingLabels {
+  text-align: center;
+  margin-bottom: $spacing-lg;
+  min-height: 40rpx;
+}
+
+.ratingLabelText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
 }
 
 .ratingTextarea {
@@ -293,4 +420,107 @@
 .btnSubmit {
   background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
   color: $color-text-white;
+}
+
+.elderMode {
+  .userName {
+    font-size: 40rpx !important;
+  }
+  .userId {
+    font-size: 28rpx !important;
+  }
+  .avatar {
+    width: 140rpx !important;
+    height: 140rpx !important;
+    font-size: 64rpx !important;
+  }
+  .statValue {
+    font-size: 44rpx !important;
+  }
+  .statLabel {
+    font-size: 26rpx !important;
+  }
+  .sectionTitle {
+    font-size: 34rpx !important;
+  }
+  .settingText {
+    font-size: 32rpx !important;
+  }
+  .settingDesc {
+    font-size: 26rpx !important;
+  }
+  .settingIcon {
+    font-size: 40rpx !important;
+    width: 56rpx !important;
+  }
+  .settingHint {
+    font-size: 28rpx !important;
+  }
+  .filterTab {
+    font-size: 30rpx !important;
+    padding: 12rpx 24rpx !important;
+  }
+  .recordService {
+    font-size: 32rpx !important;
+  }
+  .recordStatus {
+    font-size: 26rpx !important;
+    padding: 6rpx 16rpx !important;
+  }
+  .recordInfo {
+    font-size: 28rpx !important;
+  }
+  .recordComment {
+    font-size: 28rpx !important;
+  }
+  .recordDate {
+    font-size: 26rpx !important;
+  }
+  .rateBtn {
+    height: 56rpx !important;
+    font-size: 26rpx !important;
+    padding: 0 $spacing-lg !important;
+  }
+  .moreLink {
+    font-size: 30rpx !important;
+  }
+  .emptyText {
+    font-size: 30rpx !important;
+  }
+  .switch {
+    width: 100rpx !important;
+    height: 56rpx !important;
+
+    &::after {
+      width: 48rpx !important;
+      height: 48rpx !important;
+    }
+
+    &.active::after {
+      left: 48rpx !important;
+    }
+  }
+}
+
+.elderContent {
+  .ratingTitle {
+    font-size: 40rpx !important;
+  }
+  .ratingService {
+    font-size: 30rpx !important;
+  }
+  .star {
+    font-size: 80rpx !important;
+  }
+  .ratingLabelText {
+    font-size: 30rpx !important;
+  }
+  .ratingTextarea {
+    font-size: 30rpx !important;
+    height: 200rpx !important;
+  }
+  .ratingBtn {
+    height: 110rpx !important;
+    font-size: 32rpx !important;
+  }
 }

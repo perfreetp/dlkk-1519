@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, Button, Textarea } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
@@ -15,22 +15,36 @@ const filterOptions = [
 ];
 
 const RecordPage: React.FC = () => {
-  const { elderMode, toggleElderMode, voiceMode, toggleVoiceMode } = useAppStore();
+  const {
+    elderMode,
+    toggleElderMode,
+    voiceMode,
+    toggleVoiceMode,
+    saveRating,
+    getRating,
+    speak
+  } = useAppStore();
   const [activeFilter, setActiveFilter] = useState('all');
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [ratingRecord, setRatingRecord] = useState<ServiceRecord | null>(null);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
 
-  const records: ServiceRecord[] = queueHistoryMock.map(q => ({
-    id: q.id,
-    serviceName: q.serviceName,
-    hallName: q.hallName,
-    date: q.createTime.split(' ')[0],
-    status: q.status === 'completed' ? 'completed' : 'incomplete',
-    queueNumber: q.queueNumber,
-    rating: q.status === 'completed' && q.id !== 'queue-h-2' ? Math.floor(Math.random() * 3) + 3 : undefined
-  }));
+  const records: ServiceRecord[] = useMemo(() => {
+    return queueHistoryMock.map(q => {
+      const savedRating = getRating(q.id);
+      return {
+        id: q.id,
+        serviceName: q.serviceName,
+        hallName: q.hallName,
+        date: q.createTime.split(' ')[0],
+        status: q.status === 'completed' ? 'completed' : 'incomplete',
+        queueNumber: q.queueNumber,
+        rating: savedRating?.rating,
+        comment: savedRating?.comment
+      };
+    });
+  }, [getRating]);
 
   const filteredRecords = activeFilter === 'all'
     ? records
@@ -38,8 +52,9 @@ const RecordPage: React.FC = () => {
 
   const handleRate = (record: ServiceRecord) => {
     setRatingRecord(record);
-    setRating(0);
-    setComment('');
+    const existing = getRating(record.id);
+    setRating(existing?.rating || 0);
+    setComment(existing?.comment || '');
     setShowRatingModal(true);
   };
 
@@ -51,11 +66,25 @@ const RecordPage: React.FC = () => {
       });
       return;
     }
+    if (!ratingRecord) return;
+
+    saveRating(ratingRecord.id, rating, comment);
+    if (voiceMode) {
+      speak('评价提交成功');
+    }
     Taro.showToast({
       title: '评价成功',
       icon: 'success'
     });
     setShowRatingModal(false);
+  };
+
+  const handleToggleElder = () => {
+    toggleElderMode();
+  };
+
+  const handleToggleVoice = () => {
+    toggleVoiceMode();
   };
 
   const stats = {
@@ -64,8 +93,30 @@ const RecordPage: React.FC = () => {
     avgWait: '15分'
   };
 
+  const renderStars = (rating?: number) => {
+    if (!rating) return null;
+    return (
+      <View style={{ display: 'flex', gap: 4 }}>
+        {[1, 2, 3, 4, 5].map(i => (
+          <Text
+            key={i}
+            style={{
+              fontSize: elderMode ? 32 : 28,
+              color: i <= rating ? '#ff7d00' : '#c9cdd4'
+            }}
+          >
+            ★
+          </Text>
+        ))}
+      </View>
+    );
+  };
+
   return (
-    <ScrollView className={styles.page} scrollY>
+    <ScrollView
+      className={classnames(styles.page, elderMode && styles.elderMode)}
+      scrollY
+    >
       <View className={styles.header}>
         <View className={styles.userInfo}>
           <View className={styles.avatar}>👤</View>
@@ -100,12 +151,12 @@ const RecordPage: React.FC = () => {
                 <Text className={styles.settingIcon}>🔍</Text>
                 <View>
                   <Text className={styles.settingText}>大字模式</Text>
-                  <Text className={styles.settingDesc}>适老化字体放大</Text>
+                  <Text className={styles.settingDesc}>适老化字体放大，界面更清晰</Text>
                 </View>
               </View>
               <View
                 className={classnames(styles.switch, elderMode && styles.active)}
-                onClick={toggleElderMode}
+                onClick={handleToggleElder}
               />
             </View>
             <View className={styles.settingItem}>
@@ -113,12 +164,12 @@ const RecordPage: React.FC = () => {
                 <Text className={styles.settingIcon}>🔊</Text>
                 <View>
                   <Text className={styles.settingText}>语音播报</Text>
-                  <Text className={styles.settingDesc}>叫号语音提醒</Text>
+                  <Text className={styles.settingDesc}>叫号提醒、操作反馈语音播报</Text>
                 </View>
               </View>
               <View
                 className={classnames(styles.switch, voiceMode && styles.active)}
-                onClick={toggleVoiceMode}
+                onClick={handleToggleVoice}
               />
             </View>
             <View className={styles.settingItem}>
@@ -130,7 +181,7 @@ const RecordPage: React.FC = () => {
                 </View>
               </View>
               <View className={styles.settingRight}>
-                <Text style={{ color: '#86909c', fontSize: 24 }}>市政务服务中心</Text>
+                <Text className={styles.settingHint}>市政务服务中心</Text>
                 <Text className={styles.settingArrow}>›</Text>
               </View>
             </View>
@@ -152,13 +203,49 @@ const RecordPage: React.FC = () => {
           </View>
 
           <View className={styles.recordList}>
-            {filteredRecords.map(record => (
-              <RecordItem
-                key={record.id}
-                record={record}
-                onRate={() => handleRate(record)}
-              />
-            ))}
+            {filteredRecords.map(record => {
+              const savedRating = getRating(record.id);
+              return (
+                <View key={record.id} className={styles.recordCard}>
+                  <View className={styles.recordHeader}>
+                    <Text className={styles.recordService}>{record.serviceName}</Text>
+                    <Text
+                      className={classnames(
+                        styles.recordStatus,
+                        record.status === 'completed' ? styles.statusCompleted : styles.statusIncomplete
+                      )}
+                    >
+                      {record.status === 'completed' ? '已办结' : '未办结'}
+                    </Text>
+                  </View>
+                  <View className={styles.recordInfo}>
+                    <Text className={styles.recordHall}>📍 {record.hallName}</Text>
+                    <Text className={styles.recordQueue}>号：{record.queueNumber}</Text>
+                  </View>
+                  {savedRating && (
+                    <View className={styles.recordRating}>
+                      {renderStars(savedRating.rating)}
+                      {savedRating.comment && (
+                        <Text className={styles.recordComment}>{savedRating.comment}</Text>
+                      )}
+                    </View>
+                  )}
+                  <View className={styles.recordFooter}>
+                    <Text className={styles.recordDate}>{record.date}</Text>
+                    {record.status === 'completed' && !savedRating && (
+                      <Button className={styles.rateBtn} onClick={() => handleRate(record)}>
+                        去评价
+                      </Button>
+                    )}
+                    {record.status === 'completed' && savedRating && (
+                      <Button className={styles.rateBtn} onClick={() => handleRate(record)}>
+                        修改评价
+                      </Button>
+                    )}
+                  </View>
+                </View>
+              );
+            })}
           </View>
 
           {filteredRecords.length === 0 && (
@@ -198,25 +285,39 @@ const RecordPage: React.FC = () => {
         </View>
       </View>
 
-      {showRatingModal && (
+      {showRatingModal && ratingRecord && (
         <View className={styles.ratingModal} onClick={() => setShowRatingModal(false)}>
-          <View className={styles.ratingContent} onClick={(e) => e.stopPropagation()}>
+          <View
+            className={classnames(styles.ratingContent, elderMode && styles.elderContent)}
+            onClick={(e) => e.stopPropagation()}
+          >
             <Text className={styles.ratingTitle}>服务评价</Text>
 
-            <Text style={{ textAlign: 'center', marginBottom: 24, color: '#4e5969' }}>
-              {ratingRecord?.serviceName}
+            <Text className={styles.ratingService}>
+              {ratingRecord.serviceName}
             </Text>
 
             <View className={styles.ratingStars}>
               {[1, 2, 3, 4, 5].map(star => (
                 <Text
                   key={star}
-                  className={classnames(styles.star, rating >= star && styles.active)}
+                  className={classnames(styles.star, rating >= star && styles.starActive)}
                   onClick={() => setRating(star)}
                 >
                   ★
                 </Text>
               ))}
+            </View>
+
+            <View className={styles.ratingLabels}>
+              <Text className={styles.ratingLabelText}>
+                {rating === 1 && '非常不满意'}
+                {rating === 2 && '不满意'}
+                {rating === 3 && '一般'}
+                {rating === 4 && '满意'}
+                {rating === 5 && '非常满意'}
+                {rating === 0 && '请点击星星评分'}
+              </Text>
             </View>
 
             <Textarea
